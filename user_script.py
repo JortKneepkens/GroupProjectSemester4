@@ -1,7 +1,5 @@
 def get_puzzle():
-    """
-    Define and return the Sudoku puzzle.
-    """
+    # Example puzzle (replace it with your actual puzzle)
     puzzle = [
         [5, 3, 0, 0, 7, 0, 0, 0, 0],
         [6, 0, 0, 1, 9, 5, 0, 0, 0],
@@ -15,67 +13,57 @@ def get_puzzle():
     ]
     return puzzle
 
-def solve_row(row, puzzle):
-    """
-    Solve the specified row of the Sudoku puzzle.
-    """
-    solve(puzzle, [row], range(9))  # Pass a list containing the row
+def is_valid_move(puzzle, row, col, num):
+    # Check if the move is valid for the given row, column, and subgrid
+    return (
+        all(num != puzzle[row][i] for i in range(9)) and
+        all(num != puzzle[i][col] for i in range(9)) and
+        all(num != puzzle[row//3*3 + i][col//3*3 + j] for i in range(3) for j in range(3))
+    )
 
-def solve_column(column, puzzle):
-    """
-    Solve the specified column of the Sudoku puzzle.
-    """
-    solve(puzzle, range(9), [column])  # Pass a list containing the column
+def solve_cell(row, col, puzzle):
+    if puzzle[row][col] == 0:
+        for num in range(1, 10):
+            if is_valid_move(puzzle, row, col, num):
+                puzzle[row][col] = num
+                if solve_sudoku(puzzle):  # Recursive call to solve the entire puzzle
+                    return row, col, num  # Return solution tuple if the puzzle is solved
+                puzzle[row][col] = 0  # Backtrack if the solution is not valid
+        return None  # Return None if no valid move found
+    return solve_sudoku(puzzle)  # Recursive call to solve the entire puzzle
 
-def solve_subgrid(subgrid, puzzle):
-    """
-    Solve the specified 3x3 subgrid of the Sudoku puzzle.
-    """
-    start_row, start_col = 3 * (subgrid // 3), 3 * (subgrid % 3)
-    solve(puzzle, range(start_row, start_row + 3), range(start_col, start_col + 3))
-
-def is_valid_puzzle(puzzle):
-    """
-    Check if the entire Sudoku puzzle is valid.
-    """
+def solve_sudoku(puzzle):
     for row in range(9):
         for col in range(9):
-            if puzzle[row][col] != 0:
-                num = puzzle[row][col]
-                if not is_valid(puzzle, row, col, num):
-                    return False
-    return True
-
-def is_valid(puzzle, row, col, num):
-    """
-    Check if placing 'num' in position (row, col) of the puzzle is valid.
-    """
-    # Check if 'num' already exists in the row or column
-    for i in range(9):
-        if puzzle[row][i] == num or puzzle[i][col] == num:
-            return False
-
-    # Check the subgrid
-    start_row, start_col = 3 * (row // 3), 3 * (col // 3)
-    for i in range(3):
-        for j in range(3):
-            if puzzle[i + start_row][j + start_col] == num:
-                return False
-
-    return True
-
-def solve(puzzle, rows, cols):
-    """
-    Backtracking function to solve the Sudoku puzzle.
-    """
-    for row in rows:
-        for col in cols:
             if puzzle[row][col] == 0:
-                for num in range(1, 10):
-                    if is_valid(puzzle, row, col, num):
-                        puzzle[row][col] = num
-                        if solve(puzzle, rows, cols):
-                            return True
-                        puzzle[row][col] = 0  # Backtrack
+                if solve_cell(row, col, puzzle) is None:
+                    return False  # Return False if no solution found
+    return True  # Return True if the puzzle is solved
+
+
+def find_empty_cell(puzzle):
+    for row in range(9):
+        for col in range(9):
+            if puzzle[row][col] == 0:
+                return row, col
+    return None  # No empty cell found
+
+def is_valid_puzzle(puzzle):
+    # Implement logic to validate if the Sudoku puzzle is solved correctly
+    # Check rows, columns, and subgrids for duplicates
+    def is_valid(arr):
+        seen = set()
+        for num in arr:
+            if num != 0 and num in seen:
                 return False
+            seen.add(num)
+        return True
+
+    for i in range(9):
+        if not is_valid(puzzle[i]):  # Check rows
+            return False
+        if not is_valid([puzzle[j][i] for j in range(9)]):  # Check columns
+            return False
+        if not is_valid([puzzle[i//3*3 + j//3][i%3*3 + j%3] for j in range(9)]):  # Check subgrids
+            return False
     return True
