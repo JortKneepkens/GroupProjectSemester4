@@ -21,25 +21,31 @@ def is_valid_move(puzzle, row, col, num):
         all(num != puzzle[row//3*3 + i][col//3*3 + j] for i in range(3) for j in range(3))
     )
 
+def solve_sudoku(puzzle):
+    empty_cell = find_empty_cell(puzzle)
+    if empty_cell is None:
+        return True  # Puzzle is solved
+
+    row, col = empty_cell
+    for num in range(1, 10):
+        if is_valid_move(puzzle, row, col, num):
+            puzzle[row][col] = num
+            if solve_sudoku(puzzle):  # Recursive call to solve the entire puzzle
+                return True  # Return True if the puzzle is solved
+            puzzle[row][col] = 0  # Backtrack if the solution is not valid
+    return False  # Return False if no solution found
+
 def solve_cell(row, col, puzzle):
     if puzzle[row][col] == 0:
         for num in range(1, 10):
             if is_valid_move(puzzle, row, col, num):
                 puzzle[row][col] = num
-                if solve_sudoku(puzzle):  # Recursive call to solve the entire puzzle
+                if solve_sudoku(puzzle):  # Attempt to solve the puzzle
+                    print("Returning found solution for cell")
                     return row, col, num  # Return solution tuple if the puzzle is solved
                 puzzle[row][col] = 0  # Backtrack if the solution is not valid
-        return None  # Return None if no valid move found
-    return None  # Return None if the cell is already filled
-
-def solve_sudoku(puzzle):
-    for row in range(9):
-        for col in range(9):
-            if puzzle[row][col] == 0:
-                if solve_cell(row, col, puzzle) is None:
-                    return False  # Return False if no solution found
-    return True  # Return True if the puzzle is solved
-
+        return row, col, 0  # Return None if no valid move found
+    return row, col, puzzle[row][col]  # Return the same number if the cell is already filled
 
 def find_empty_cell(puzzle):
     for row in range(9):
