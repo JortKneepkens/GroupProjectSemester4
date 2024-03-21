@@ -2,7 +2,7 @@ from pyspark import SparkContext, SparkConf
 import user_script  # Import the user script
 
 # Initialize Spark session
-sparkconf = SparkConf().setAppName("Sudoku Solver").setMaster("spark://ubuntu-server-2204:7077")
+sparkconf = SparkConf().setAppName("Sudoku Solver").setMaster("spark://192.168.0.4:7077")
 sparkcontext = SparkContext(conf=sparkconf)
 
 # Distribute user_script.py to all workers
