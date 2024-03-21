@@ -24,7 +24,8 @@ def solve_task(task):
     return None
 
 def update_puzzle(solution):
-    print("updating puzzle ")
+    print("updating puzzle")
+    print(puzzle)
     row, col, value = solution
     puzzle[row][col] = value
 

@@ -30,7 +30,7 @@ def solve_cell(row, col, puzzle):
                     return row, col, num  # Return solution tuple if the puzzle is solved
                 puzzle[row][col] = 0  # Backtrack if the solution is not valid
         return None  # Return None if no valid move found
-    return solve_sudoku(puzzle)  # Recursive call to solve the entire puzzle
+    return None  # Return None if the cell is already filled
 
 def solve_sudoku(puzzle):
     for row in range(9):
