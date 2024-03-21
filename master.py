@@ -1,43 +1,19 @@
-from pyspark.sql import SparkSession
-from queue import Queue
-import multiprocessing
+from pyspark import SparkContext, SparkConf
 import user_script  # Import the user script
-import threading
 
-# Initialize a lock for controlling access to the available_workers list
-lock = threading.Lock()
+# Initialize Spark session
+sparkconf = SparkConf().setAppName("Sudoku Solver").setMaster("spark://ubuntu-server-2204:7077")
+sparkcontext = SparkContext(conf=sparkconf)
 
-def distribute_tasks(tasks):
-    """
-    Distribute tasks to worker nodes for processing.
-    """
-    return spark.sparkContext.parallelize(tasks, len(tasks))
-
-def assign_tasks_to_workers(task_queue, available_workers):
-    """
-    Assign tasks to available workers.
-    """
-    # Check if there are any available workers
-    with lock:
-        if not available_workers:
-            print("No available workers. Waiting for workers to become available.")
-            return
-    
-    # Proceed with task assignment
-    while not task_queue.empty():
-        with lock:
-            if not available_workers:
-                # No available workers, wait until one becomes available
-                print("No available workers. Waiting for workers to become available.")
-                continue
-            task = task_queue.get()
-            worker = available_workers.pop()
-        solve_task(worker, task)
-
-def solve_task(worker, task):
-    """
-    Solve the task assigned to the worker.
-    """
+# Define Sudoku puzzle (in the user script)
+puzzle = user_script.get_puzzle()
+print(puzzle)
+# Define tasks for workers
+tasks = [('row', i) for i in range(9)] + [('column', i) for i in range(9)] + [('subgrid', i) for i in range(9)]
+task_rdd = sparkcontext.parallelize(tasks)
+print(tasks)
+# Solve tasks using Spark
+def solve_task(task):
     task_type, index = task
     if task_type == 'row':
         user_script.solve_row(index, puzzle)
@@ -45,34 +21,13 @@ def solve_task(worker, task):
         user_script.solve_column(index, puzzle)
     elif task_type == 'subgrid':
         user_script.solve_subgrid(index, puzzle)
-    
-    # After solving the task, mark worker as available
-    with lock:
-        available_workers.append(worker)
+    return task
 
-# Initialize Spark session
-spark = SparkSession.builder \
-    .appName("Sudoku Solver") \
-    .getOrCreate()
+solved_tasks_rdd = task_rdd.map(solve_task)
 
-# Define Sudoku puzzle (in the user script)
-puzzle = user_script.get_puzzle()
-
-# Define tasks for workers
-tasks = [('row', i) for i in range(9)] + [('column', i) for i in range(9)] + [('subgrid', i) for i in range(9)]
-task_queue = Queue()
-for task in tasks:
-    task_queue.put(task)
-
-# Define the number of workers available
-num_workers = multiprocessing.cpu_count()  # Number of available CPU cores
-
-# Initialize available workers list
-available_workers = [i for i in range(num_workers)]
-
-# Assign tasks to available workers
-assign_tasks_to_workers(task_queue, available_workers)
-
+# Collect solved tasks
+solved_tasks = solved_tasks_rdd.collect()
+print(solved_tasks)
 # Validate the puzzle
 valid = user_script.is_valid_puzzle(puzzle)
 if valid:
@@ -80,5 +35,6 @@ if valid:
 else:
     print("Error: Invalid Sudoku puzzle.")
 
+print(puzzle)
 # Stop Spark session
-spark.stop()
+sparkcontext.stop()
