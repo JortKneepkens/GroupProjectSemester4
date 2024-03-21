@@ -19,12 +19,12 @@ task_rdd = sparkcontext.parallelize(tasks)
 def solve_task(task):
     cell_type, (row, col) = task
     if cell_type == 'cell':
-        print("solving task "+ task)
+        print("solving task ")
         return user_script.solve_cell(row, col, puzzle)
     return None
 
 def update_puzzle(solution):
-    print("updating puzzle "+ solution)
+    print("updating puzzle ")
     row, col, value = solution
     puzzle[row][col] = value
 
