@@ -20,7 +20,9 @@ def solve_task(task, puzzle):
     cell_type, (row, col) = task
     if cell_type == 'cell':
         print("Solving task: ", task)
-        return user_script.solve_cell(row, col, puzzle)
+        result = user_script.solve_cell(row, col, puzzle)
+        print(result)
+        return result
     return None
 
 def update_puzzle(solution):
