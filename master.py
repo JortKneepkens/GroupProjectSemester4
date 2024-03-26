@@ -29,8 +29,15 @@ def update_puzzle(solution):
     row, col, value = solution
     puzzle[row][col] = value
 
-solved_tasks_rdd = task_rdd.map(solve_task).filter(lambda x: x is not None)
-solved_tasks_rdd.foreach(update_puzzle)
+# Distribute tasks among workers
+while not task_rdd.isEmpty():
+    # Solve tasks using Spark
+    solved_tasks_rdd = task_rdd.map(solve_task).filter(lambda x: x is not None)
+    solved_tasks_rdd.foreach(update_puzzle)
+    # Check if there are more tasks to distribute
+    if not task_rdd.isEmpty():
+        # Some tasks are remaining, redistribute them
+        task_rdd = sparkcontext.parallelize(task_rdd.collect())
 
 # Validate the puzzle
 valid = user_script.is_valid_puzzle(puzzle)
