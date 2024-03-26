@@ -34,6 +34,8 @@ while not task_rdd.isEmpty():
     # Solve tasks using Spark
     solved_tasks_rdd = task_rdd.map(solve_task).filter(lambda x: x is not None)
     solved_tasks_rdd.foreach(update_puzzle)
+    print(task_rdd.count())
+    print("distributing tasks")
     # Check if there are more tasks to distribute
     if not task_rdd.isEmpty():
         # Some tasks are remaining, redistribute them
