@@ -27,9 +27,14 @@ def solve_task(task, puzzle):
 
 def update_puzzle(solution):
     print("updating puzzle")
-    print(puzzle)
+    print_puzzle(puzzle)
     row, col, value = solution
     puzzle[row][col] = value
+
+# Function to print the puzzle in a formatted way
+def print_puzzle(puzzle):
+    for row in puzzle:
+        print(' '.join(map(str, row)))
 
 # Get the number of executors (workers)
 num_workers = sparkcontext._jsc.sc().getExecutorMemoryStatus().size()
@@ -66,9 +71,10 @@ while unsolved_tasks:
 valid = user_script.is_valid_puzzle(puzzle)
 if valid:
     print("Sudoku puzzle solved successfully.")
-    print(puzzle)
+    print_puzzle(puzzle)
 else:
     print("Error: Invalid Sudoku puzzle.")
+    print_puzzle(puzzle)
 
 # Stop Spark session
 sparkcontext.stop()
