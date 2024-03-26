@@ -13,7 +13,7 @@ puzzle = user_script.get_puzzle()
 
 # Define tasks for workers
 tasks = [('cell', (i, j)) for i in range(9) for j in range(9)]
-task_rdd = sparkcontext.parallelize(tasks)
+# task_rdd = sparkcontext.parallelize(tasks)
 
 # Solve tasks using Spark
 def solve_task(task, puzzle):
@@ -38,23 +38,30 @@ num_workers = sparkcontext._jsc.sc().getExecutorMemoryStatus().size()
 print("Number of workers:", num_workers)
 
 # Distribute tasks among workers
-#while not task_rdd.isEmpty():
-    # Solve tasks using Spark
-# Get the current version of the puzzle
 current_puzzle = puzzle.copy()
 
 # Solve tasks using Spark, passing the current puzzle version
-solved_tasks_rdd = task_rdd.map(lambda task: solve_task(task, current_puzzle)).filter(lambda x: x is not None)
-solved_tasks_rdd.foreach(update_puzzle)
-print(task_rdd.count())
-print("distributing tasks")
+# solved_tasks_rdd = task_rdd.map(lambda task: solve_task(task, current_puzzle)).filter(lambda x: x is not None)
+# solved_tasks_rdd.foreach(update_puzzle)
+# print(task_rdd.count())
+# print("distributing tasks")
 # Check if there are more tasks to distribute
 # if not task_rdd.isEmpty():
 #     # Some tasks are remaining, redistribute them
 #     task_rdd = sparkcontext.parallelize(task_rdd.collect())
 
-results = solved_tasks_rdd.collect()
-print(results)
+# Assign tasks to workers and continuously update puzzle
+unsolved_tasks = tasks.copy()  # Maintain a copy of unsolved tasks
+while unsolved_tasks:
+    task = unsolved_tasks.pop(0)  # Get the first unsolved task
+    print(unsolved_tasks.count())
+    print (unsolved_tasks)
+    # Solve task using Spark, passing the current puzzle version
+    solved_task = sparkcontext.parallelize([task]).map(lambda t: solve_task(t, puzzle)).filter(lambda x: x is not None).collect()[0]
+    
+    # Update puzzle
+    update_puzzle(solved_task)
+
 # Validate the puzzle
 valid = user_script.is_valid_puzzle(puzzle)
 if valid:
