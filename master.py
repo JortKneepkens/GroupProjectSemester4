@@ -23,30 +23,42 @@ def solve_task(task):
         return user_script.solve_cell(row, col, puzzle)
     return None
 
+def solve_task_test():
+    print("5")
+    return 5
+
 def update_puzzle(solution):
     print("updating puzzle")
     print(puzzle)
     row, col, value = solution
     puzzle[row][col] = value
 
-# Distribute tasks among workers
-while not task_rdd.isEmpty():
-    # Solve tasks using Spark
-    solved_tasks_rdd = task_rdd.map(solve_task).filter(lambda x: x is not None)
-    solved_tasks_rdd.foreach(update_puzzle)
-    print(task_rdd.count())
-    print("distributing tasks")
-    # Check if there are more tasks to distribute
-    if not task_rdd.isEmpty():
-        # Some tasks are remaining, redistribute them
-        task_rdd = sparkcontext.parallelize(task_rdd.collect())
+# Get the number of executors (workers)
+num_workers = sparkcontext._jsc.sc().getExecutorMemoryStatus().size()
 
-# Validate the puzzle
-valid = user_script.is_valid_puzzle(puzzle)
-if valid:
-    print("Sudoku puzzle solved successfully.")
-else:
-    print("Error: Invalid Sudoku puzzle.")
+# Print the number of workers
+print("Number of workers:", num_workers)
+
+# Distribute tasks among workers
+#while not task_rdd.isEmpty():
+    # Solve tasks using Spark
+solved_tasks_rdd = task_rdd.map(solve_task_test).filter(lambda x: x is not None)
+#solved_tasks_rdd.foreach(update_puzzle)
+print(task_rdd.count())
+print("distributing tasks")
+# Check if there are more tasks to distribute
+# if not task_rdd.isEmpty():
+#     # Some tasks are remaining, redistribute them
+#     task_rdd = sparkcontext.parallelize(task_rdd.collect())
+
+results = solved_tasks_rdd.collect()
+print(results)
+# # Validate the puzzle
+# valid = user_script.is_valid_puzzle(puzzle)
+# if valid:
+#     print("Sudoku puzzle solved successfully.")
+# else:
+#     print("Error: Invalid Sudoku puzzle.")
 
 # Stop Spark session
 sparkcontext.stop()
