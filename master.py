@@ -54,7 +54,7 @@ current_puzzle = puzzle.copy()
 unsolved_tasks = tasks.copy()  # Maintain a copy of unsolved tasks
 while unsolved_tasks:
     task = unsolved_tasks.pop(0)  # Get the first unsolved task
-    print(unsolved_tasks.count())
+    print("Unsolved tasks remaining:", len(unsolved_tasks))
     print (unsolved_tasks)
     # Solve task using Spark, passing the current puzzle version
     solved_task = sparkcontext.parallelize([task]).map(lambda t: solve_task(t, puzzle)).filter(lambda x: x is not None).collect()[0]
