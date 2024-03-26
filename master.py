@@ -23,7 +23,7 @@ def solve_task(task):
         return user_script.solve_cell(row, col, puzzle)
     return None
 
-def solve_task_test():
+def solve_task_test(task):
     print("5")
     return 5
 
