@@ -16,16 +16,12 @@ tasks = [('cell', (i, j)) for i in range(9) for j in range(9)]
 task_rdd = sparkcontext.parallelize(tasks)
 
 # Solve tasks using Spark
-def solve_task(task):
+def solve_task(task, puzzle):
     cell_type, (row, col) = task
     if cell_type == 'cell':
-        print("solving task ")
+        print("Solving task: ", task)
         return user_script.solve_cell(row, col, puzzle)
     return None
-
-def solve_task_test(task):
-    print("5")
-    return 5
 
 def update_puzzle(solution):
     print("updating puzzle")
@@ -42,8 +38,12 @@ print("Number of workers:", num_workers)
 # Distribute tasks among workers
 #while not task_rdd.isEmpty():
     # Solve tasks using Spark
-solved_tasks_rdd = task_rdd.map(solve_task_test).filter(lambda x: x is not None)
-#solved_tasks_rdd.foreach(update_puzzle)
+# Get the current version of the puzzle
+current_puzzle = puzzle.copy()
+
+# Solve tasks using Spark, passing the current puzzle version
+solved_tasks_rdd = task_rdd.map(lambda task: solve_task(task, current_puzzle)).filter(lambda x: x is not None)
+solved_tasks_rdd.foreach(update_puzzle)
 print(task_rdd.count())
 print("distributing tasks")
 # Check if there are more tasks to distribute
@@ -53,12 +53,13 @@ print("distributing tasks")
 
 results = solved_tasks_rdd.collect()
 print(results)
-# # Validate the puzzle
-# valid = user_script.is_valid_puzzle(puzzle)
-# if valid:
-#     print("Sudoku puzzle solved successfully.")
-# else:
-#     print("Error: Invalid Sudoku puzzle.")
+# Validate the puzzle
+valid = user_script.is_valid_puzzle(puzzle)
+if valid:
+    print("Sudoku puzzle solved successfully.")
+    print(puzzle)
+else:
+    print("Error: Invalid Sudoku puzzle.")
 
 # Stop Spark session
 sparkcontext.stop()
