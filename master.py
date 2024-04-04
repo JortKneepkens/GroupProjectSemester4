@@ -2,7 +2,7 @@ from pyspark import SparkContext, SparkConf
 import user_script  # Import the user script
 
 # Initialize Spark session
-sparkconf = SparkConf().setAppName("Sudoku Solver").setMaster("spark://192.168.0.4:7077")
+sparkconf = SparkConf().setAppName("Sudoku Solver").setMaster("spark://10.0.0.4:7077")
 sparkcontext = SparkContext(conf=sparkconf)
 
 # Distribute user_script.py to all workers
@@ -36,13 +36,7 @@ def print_puzzle(puzzle):
     for row in puzzle:
         print(' '.join(map(str, row)))
 
-# Get the number of executors (workers)
-num_workers = sparkcontext._jsc.sc().getExecutorMemoryStatus().size()
-
-# Print the number of workers
-print("Number of workers:", num_workers)
-
-# Distribute tasks among workers
+# Get the puzzle
 current_puzzle = puzzle.copy()
 
 unsolved_tasks = tasks.copy()  # Maintain a copy of unsolved tasks
