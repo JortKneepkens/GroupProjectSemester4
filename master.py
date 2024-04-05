@@ -15,13 +15,17 @@ import user_script  # Import the user script
 
 # Function to set spark.driver.host dynamically based on network location
 def set_driver_host():
-    print(os.environ.get("INTERNAL_NETWORK"))
-    if os.environ.get("INTERNAL_NETWORK"):
-        print("internal 10.0.0.4")
+    internal_network = os.environ.get("INTERNAL_NETWORK")
+    print(internal_network)
+
+    if internal_network == "true":
+        print("Internal 10.0.0.4")
         return "10.0.0.4"  # Replace with the internal IP address
-    else:
-        print("external 145.220.74.141")
+    elif internal_network == "false":
+        print("External 145.220.74.141")
         return "145.220.74.141"  # Replace with the external IP address
+    else:
+        raise ValueError("INTERNAL_NETWORK must be set to 'true' or 'false'")
 
 # Initialize Spark session
 sparkconf = SparkConf().setAppName("Sudoku Solver") \
