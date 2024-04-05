@@ -15,6 +15,7 @@ import user_script  # Import the user script
 
 # Function to set spark.driver.host dynamically based on network location
 def set_driver_host():
+    print(os.environ)
     internal_network = os.environ.get("INTERNAL_NETWORK")
     print(internal_network)
 
