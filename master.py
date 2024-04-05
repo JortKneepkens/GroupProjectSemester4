@@ -2,22 +2,25 @@ from pyspark import SparkContext, SparkConf
 import os
 import user_script  # Import the user script
 
-# Function to determine network location of the worker
-def determine_network_location():
-    # Example logic: Check environment variable to determine network location
-    if os.environ.get("INTERNAL_NETWORK"):
-        print("Internal")
-        return "internal"
-    else:
-        print("Internal")
-        return "external"
+# # Function to determine network location of the worker
+# def determine_network_location():
+#     # Example logic: Check environment variable to determine network location
+#     print(os.environ.get("INTERNAL_NETWORK"))
+#     if os.environ.get("INTERNAL_NETWORK"):
+#         print("Internal")
+#         return "internal"
+#     else:
+#         print("Internal")
+#         return "external"
 
 # Function to set spark.driver.host dynamically based on network location
 def set_driver_host():
-    network_location = determine_network_location()
-    if network_location == "internal":
+    print(os.environ.get("INTERNAL_NETWORK"))
+    if os.environ.get("INTERNAL_NETWORK"):
+        print("internal 10.0.0.4")
         return "10.0.0.4"  # Replace with the internal IP address
     else:
+        print("external 145.220.74.141")
         return "145.220.74.141"  # Replace with the external IP address
 
 # Initialize Spark session
