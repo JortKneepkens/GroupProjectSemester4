@@ -6,8 +6,10 @@ import user_script  # Import the user script
 def determine_network_location():
     # Example logic: Check environment variable to determine network location
     if os.environ.get("INTERNAL_NETWORK"):
+        print("Internal")
         return "internal"
     else:
+        print("Internal")
         return "external"
 
 # Function to set spark.driver.host dynamically based on network location
@@ -27,7 +29,8 @@ sparkconf = SparkConf().setAppName("Sudoku Solver") \
 
 # Set spark.driver.host dynamically
 driver_host = set_driver_host()
-sparkconf.set("spark.driver.host", driver_host).set("spark.driver.port","50243")
+print(driver_host)
+sparkconf.set("spark.driver.host", driver_host).set("spark.driver.bindAddress", "10.0.0.4").set("spark.driver.port","50243")
 
 sparkcontext = SparkContext(conf=sparkconf)
 
