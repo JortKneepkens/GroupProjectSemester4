@@ -5,7 +5,8 @@ import user_script  # Import the user script
 sparkconf = SparkConf().setAppName("Sudoku Solver") \
                         .setMaster("spark://145.220.74.141:7077") \
                         .set("spark.driver.host", "10.0.0.4") \
-                        .set("spark.driver.bindAddress", "10.0.0.4")
+                        .set("spark.driver.bindAddress", "10.0.0.4") \
+                        .set("spark.driver.port","50243")
 sparkcontext = SparkContext(conf=sparkconf)
 
 
