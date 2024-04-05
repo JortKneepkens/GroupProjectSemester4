@@ -1,12 +1,34 @@
 from pyspark import SparkContext, SparkConf
+import os
 import user_script  # Import the user script
+
+# Function to determine network location of the worker
+def determine_network_location():
+    # Example logic: Check environment variable to determine network location
+    if os.environ.get("INTERNAL_NETWORK"):
+        return "internal"
+    else:
+        return "external"
+
+# Function to set spark.driver.host dynamically based on network location
+def set_driver_host():
+    network_location = determine_network_location()
+    if network_location == "internal":
+        return "10.0.0.4"  # Replace with the internal IP address
+    else:
+        return "145.220.74.141"  # Replace with the external IP address
 
 # Initialize Spark session
 sparkconf = SparkConf().setAppName("Sudoku Solver") \
-                        .setMaster("spark://145.220.74.141:7077") \
-                        .set("spark.driver.host", "10.0.0.4") \
-                        .set("spark.driver.bindAddress", "10.0.0.4") \
-                        .set("spark.driver.port","50243")
+                        .setMaster("spark://10.0.0.4:7077") \
+                        # .set("spark.driver.host", "145.220.74.141") \
+                        # .set("spark.driver.bindAddress", "10.0.0.4") \
+                        # .set("spark.driver.port","50243")
+
+# Set spark.driver.host dynamically
+driver_host = set_driver_host()
+sparkconf.set("spark.driver.host", driver_host).set("spark.driver.port","50243")
+
 sparkcontext = SparkContext(conf=sparkconf)
 
 
