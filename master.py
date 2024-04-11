@@ -7,7 +7,8 @@ sparkconf = SparkConf().setAppName("Sudoku Solver") \
                         .set("spark.driver.host", "145.220.74.141") \
                         .set("spark.driver.bindAddress", "10.0.0.4") \
                         .set("spark.driver.port","50243") \
-                        .set("spark.executor.memory", "20g")  # Set the memory for Spark workers
+                        .set("spark.dynamicAllocation.enabled", "true") \
+                        .set("spark.executor.memory", "2g")  # Set the default memory for Spark workers
 
 sparkcontext = SparkContext(conf=sparkconf)
 
