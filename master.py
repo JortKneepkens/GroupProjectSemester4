@@ -7,8 +7,8 @@ sparkconf = SparkConf().setAppName("Sudoku Solver") \
                         .set("spark.driver.host", "145.220.74.141") \
                         .set("spark.driver.bindAddress", "10.0.0.4") \
                         .set("spark.driver.port","50243") \
-                        .set("spark.dynamicAllocation.enabled", "true") \
-                        .set("spark.executor.pyspark.memory", "512m")  # Set memory for PySpark within each executor to 512 MB
+                        .set("spark.executor.memoryOverhead", "512m")  # Additional overhead for each executor
+
 
 sparkcontext = SparkContext(conf=sparkconf)
 
