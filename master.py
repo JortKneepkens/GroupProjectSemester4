@@ -6,7 +6,8 @@ sparkconf = SparkConf().setAppName("Sudoku Solver") \
                         .setMaster("spark://10.0.0.4:7077") \
                         .set("spark.driver.host", "145.220.74.141") \
                         .set("spark.driver.bindAddress", "10.0.0.4") \
-                        .set("spark.driver.port","50243")
+                        .set("spark.driver.port","50243") \
+                        .set("spark.executor.memory", "4g")  # Set the memory for Spark workers
 
 sparkcontext = SparkContext(conf=sparkconf)
 
