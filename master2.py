@@ -20,7 +20,7 @@ sparkconf = SparkConf().setAppName("Sudoku Solver") \
 sparkcontext = SparkContext(conf=sparkconf)
 
 ftp_server = "192.168.0.2"
-ftp_username = "Apiuser"
+ftp_username = "sparkmaster"
 ftp_password = "P@ssword"
 
 async def retrieve_file(ftp_server, ftp_username, ftp_password, remote_filename, local_filename):
