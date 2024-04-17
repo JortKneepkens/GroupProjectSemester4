@@ -57,6 +57,23 @@ async def retrieve_file(ftp_server, ftp_username, ftp_password, remote_filename,
         # Close the FTP connection
         ftp.quit()
 
+async def delete_file_from_ftp(ftp_server, ftp_username, ftp_password, filename):
+    try:
+        # Connect to the FTP server
+        ftp = ftplib.FTP(ftp_server)
+        ftp.login(ftp_username, ftp_password)
+
+        # Delete the file
+        ftp.delete(filename)
+        print(f"File '{filename}' deleted successfully from FTP server.")
+        return True
+    except Exception as e:
+        print(f"Error deleting file from FTP: {e}")
+        return False
+    finally:
+        # Close the FTP connection
+        ftp.quit()
+
 # Solve tasks using Spark
 def solve_task(task, puzzle):
     cell_type, (row, col) = task
@@ -152,6 +169,9 @@ async def main():
                             }
                             result = await websocket.send(json.dumps(message))
                             print(result)
+                        
+                        # Delete the file from the FTP server
+                        await delete_file_from_ftp(ftp_server, ftp_username, ftp_password, message_content)
                         
                         # Unload the module to free up memory
                         del sys.modules[local_filename[:-3]]
