@@ -19,19 +19,23 @@ sparkconf = SparkConf().setAppName("Sudoku Solver") \
 
 sparkcontext = SparkContext(conf=sparkconf)
 
+websocket_uri = "ws://192.168.0.9:8181"  # Replace with the WebSocket server URI
+
 ftp_server = "192.168.0.2"
-ftp_username = "sparkmaster"
+ftp_username = "Apiuser"
 ftp_password = "P@ssword"
+
+puzzle = None
+user_script_module = None
+
+# Define tasks for workers
+tasks = [('cell', (i, j)) for i in range(9) for j in range(9)]
 
 async def retrieve_file(ftp_server, ftp_username, ftp_password, remote_filename, local_filename):
     try:
         # Connect to the FTP server
         ftp = ftplib.FTP(ftp_server)
         ftp.login(ftp_username, ftp_password)
-
-        # Get the current directory
-        current_dir = ftp.pwd()
-        print("Current directory:", current_dir)
 
         # Download the file
         with open(local_filename, 'wb') as local_file:
@@ -44,7 +48,7 @@ async def retrieve_file(ftp_server, ftp_username, ftp_password, remote_filename,
             file_content = f.read()
             print("File content:")
             print(file_content)
-            
+
         return True
     except Exception as e:
         print(f"Error downloading file from FTP: {e}")
@@ -52,12 +56,6 @@ async def retrieve_file(ftp_server, ftp_username, ftp_password, remote_filename,
     finally:
         # Close the FTP connection
         ftp.quit()
-
-# Define tasks for workers
-tasks = [('cell', (i, j)) for i in range(9) for j in range(9)]
-
-puzzle = None
-user_script_module = None
 
 # Solve tasks using Spark
 def solve_task(task, puzzle):
@@ -69,11 +67,19 @@ def solve_task(task, puzzle):
         return result
     return None
 
-def update_puzzle(solution):
+async def update_puzzle(solution, websocket: websockets.WebSocketClientProtocol):
     print("updating puzzle")
     print_puzzle(puzzle)
     row, col, value = solution
     puzzle[row][col] = value
+
+    # Prepare message
+    message = {
+        "Type": "Puzzle_Updated",
+        "Content": puzzle
+    }
+    # Send WebSocket message
+    await websocket.send(json.dumps(message))
 
 # Function to print the puzzle in a formatted way
 def print_puzzle(puzzle):
@@ -96,9 +102,8 @@ sparkcontext.broadcast(serialized_cleanup)
 async def main():
     global puzzle
     global user_script_module
-    uri = "ws://192.168.0.9:8181"  # Replace with the WebSocket server URI
-    print(f"Connecting to {uri}...")
-    async with websockets.connect(uri) as websocket:
+    print(f"Connecting to {websocket_uri}...")
+    async with websockets.connect(websocket_uri) as websocket:
         print("Connected.")
         # Receive messages until the connection is closed
         async for message in websocket:
@@ -125,15 +130,25 @@ async def main():
                             solved_task = sparkcontext.parallelize([task]).map(lambda t: solve_task(t, puzzle)).filter(lambda x: x is not None).collect()[0]
                             
                             # Update puzzle
-                            update_puzzle(solved_task)
+                            await update_puzzle(solved_task, websocket)
 
                         # Validate the puzzle
                         valid = user_script_module.is_valid_puzzle(puzzle)
                         if valid:
                             print("Sudoku puzzle solved successfully.")
+                            message = {
+                                "Type": "Puzzle_Solved_Success",
+                                "Content": True
+                            }
+                            await websocket.send(json.dumps(message))
                             print_puzzle(puzzle)
                         else:
                             print("Error: Invalid Sudoku puzzle.")
+                            message = {
+                                "Type": "Puzzle_Solved_Success",
+                                "Content": False
+                            }
+                            await websocket.send(json.dumps(message))
                             print_puzzle(puzzle)
                         
                         # Unload the module to free up memory
