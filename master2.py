@@ -79,7 +79,8 @@ async def update_puzzle(solution, websocket: websockets.WebSocketClientProtocol)
         "Content": puzzle
     }
     # Send WebSocket message
-    await websocket.send(json.dumps(message))
+    result = await websocket.send(json.dumps(message))
+    print(result)
 
 # Function to print the puzzle in a formatted way
 def print_puzzle(puzzle):
@@ -140,7 +141,8 @@ async def main():
                                 "Type": "Puzzle_Solved_Success",
                                 "Content": True
                             }
-                            await websocket.send(json.dumps(message))
+                            result = await websocket.send(json.dumps(message))
+                            print(result)
                             print_puzzle(puzzle)
                         else:
                             print("Error: Invalid Sudoku puzzle.")
@@ -148,8 +150,8 @@ async def main():
                                 "Type": "Puzzle_Solved_Success",
                                 "Content": False
                             }
-                            await websocket.send(json.dumps(message))
-                            print_puzzle(puzzle)
+                            result = await websocket.send(json.dumps(message))
+                            print(result)
                         
                         # Unload the module to free up memory
                         del sys.modules[local_filename[:-3]]
