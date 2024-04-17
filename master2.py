@@ -29,12 +29,22 @@ async def retrieve_file(ftp_server, ftp_username, ftp_password, remote_filename,
         ftp = ftplib.FTP(ftp_server)
         ftp.login(ftp_username, ftp_password)
 
+        # Get the current directory
+        current_dir = ftp.pwd()
+        print("Current directory:", current_dir)
+
         # Download the file
         with open(local_filename, 'wb') as local_file:
             ftp.retrbinary('RETR ' + remote_filename, local_file.write)
 
         print(f"File '{remote_filename}' downloaded successfully to '{local_filename}'")
         
+        # Log the content of the downloaded file
+        with open(local_filename, 'r') as f:
+            file_content = f.read()
+            print("File content:")
+            print(file_content)
+            
         return True
     except Exception as e:
         print(f"Error downloading file from FTP: {e}")
