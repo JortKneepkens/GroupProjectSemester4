@@ -1,5 +1,8 @@
 from pyspark import SparkContext, SparkConf
-import user_script  # Import the user script
+import urllib.request
+import websockets
+import asyncio
+import json
 
 # Initialize Spark session
 sparkconf = SparkConf().setAppName("Sudoku Solver") \
@@ -12,9 +15,19 @@ sparkconf = SparkConf().setAppName("Sudoku Solver") \
 
 sparkcontext = SparkContext(conf=sparkconf)
 
+# URL of the file server where the script is saved
+file_server_url = "http://file_server_ip:port/user_script.py"
+# Path to save the script locally
+local_script_path = "user_script.py"
+
+# # Download the user script from the file server
+# urllib.request.urlretrieve(file_server_url, local_script_path)
+
+# Import the user script
+import user_script
 
 # Distribute user_script.py to all workers
-sparkcontext.addFile("user_script.py")
+sparkcontext.addFile(local_script_path)
 
 # Define Sudoku puzzle (in the user script)
 puzzle = user_script.get_puzzle()
