@@ -19,7 +19,7 @@ sparkconf = SparkConf().setAppName("Sudoku Solver") \
 
 sparkcontext = SparkContext(conf=sparkconf)
 
-websocket_uri = "ws://192.168.0.9:8181"  # Replace with the WebSocket server URI
+websocket_uri = "ws://10.0.0.14:8181"  # Replace with the WebSocket server URI
 
 ftp_server = "192.168.0.2"
 ftp_username = "sparkmaster"
