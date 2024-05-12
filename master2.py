@@ -77,6 +77,7 @@ async def delete_file_from_ftp(ftp_server, ftp_username, ftp_password, filename)
 # Solve tasks using Spark
 def solve_task(task, puzzle):
     cell_type, (row, col) = task
+    print("Solving a task at a worker")
     if cell_type == 'cell':
         print("Solving task: ", task)
         result = user_script_module.solve_cell(row, col, puzzle)
@@ -138,6 +139,7 @@ async def main():
                                 sparkcontext.addFile(local_filename)
                                 # Import the downloaded file as a module
                                 user_script_module = importlib.import_module(local_filename[:-3])  # Remove the ".py" extension
+                                print("user script imported as module")
                                 user_script_puzzle = user_script_module.get_puzzle()
                                 puzzle = user_script_puzzle.copy()
 
@@ -172,35 +174,35 @@ async def main():
                                     result = await websocket.send(json.dumps(message))
                                     print(result)
                                 
-                                # Delete the file from the FTP server
-                                await delete_file_from_ftp(ftp_server, ftp_username, ftp_password, message_content)
+                                # # Delete the file from the FTP server
+                                # await delete_file_from_ftp(ftp_server, ftp_username, ftp_password, message_content)
                                 
-                                # Unload the module to free up memory
-                                del sys.modules[local_filename[:-3]]
-                                importlib.invalidate_caches()
+                                # # Unload the module to free up memory
+                                # del sys.modules[local_filename[:-3]]
+                                # importlib.invalidate_caches()
                                 
-                                # Delete the file from the local filesystem
-                                os.remove(local_filename)
-                                # Invoke the cleanup function on each worker
-                                sparkcontext.parallelize([1]).foreach(lambda x: cloudpickle.loads(serialized_cleanup)(local_filename))
+                                # # Delete the file from the local filesystem
+                                # os.remove(local_filename)
+                                # # Invoke the cleanup function on each worker
+                                # sparkcontext.parallelize([1]).foreach(lambda x: cloudpickle.loads(serialized_cleanup)(local_filename))
 
                     except json.JSONDecodeError as e:
                         print(f"Error decoding JSON: {e}")
                     except Exception as e:
                         print(f"Error processing message: {e}")
-                    # finally:
-                    #     print("Deleting file")
-                    #     # Delete the file from the FTP server
-                    #     await delete_file_from_ftp(ftp_server, ftp_username, ftp_password, message_content)
+                    finally:
+                        print("Deleting file")
+                        # Delete the file from the FTP server
+                        await delete_file_from_ftp(ftp_server, ftp_username, ftp_password, message_content)
                         
-                    #     # Unload the module to free up memory
-                    #     del sys.modules[local_filename[:-3]]
-                    #     importlib.invalidate_caches()
+                        # Unload the module to free up memory
+                        del sys.modules[local_filename[:-3]]
+                        importlib.invalidate_caches()
                         
-                    #     # Delete the file from the local filesystem
-                    #     os.remove(local_filename)
-                    #     # Invoke the cleanup function on each worker
-                    #     sparkcontext.parallelize([1]).foreach(lambda x: cloudpickle.loads(serialized_cleanup)(local_filename))
+                        # Delete the file from the local filesystem
+                        os.remove(local_filename)
+                        # Invoke the cleanup function on each worker
+                        sparkcontext.parallelize([1]).foreach(lambda x: cloudpickle.loads(serialized_cleanup)(local_filename))
         except Exception as e:
                 print(f"Error connecting to WebSocket server: {e}")
                 print("Retrying...")
