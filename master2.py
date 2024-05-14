@@ -205,6 +205,7 @@ async def main():
                         sparkcontext.parallelize([1]).foreach(lambda x: cloudpickle.loads(serialized_cleanup)(local_filename))
         except Exception as e:
                 print(f"Error connecting to WebSocket server: {e}")
+                print(e)
                 print("Retrying...")
                 await asyncio.sleep(10)  # Wacht 5 seconden voordat opnieuw wordt geprobeerd
 

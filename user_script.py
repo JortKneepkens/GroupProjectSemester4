@@ -1,15 +1,15 @@
 def get_puzzle():
     # Example puzzle (replace it with your actual puzzle)
     puzzle = [
-        [5, 3, 0, 0, 7, 0, 0, 0, 0],
-        [6, 0, 0, 1, 9, 5, 0, 0, 0],
-        [0, 9, 8, 0, 0, 0, 0, 6, 0],
-        [8, 0, 0, 0, 6, 0, 0, 0, 3],
-        [4, 0, 0, 8, 0, 3, 0, 0, 1],
-        [7, 0, 0, 0, 2, 0, 0, 0, 6],
-        [0, 6, 0, 0, 0, 0, 2, 8, 0],
-        [0, 0, 0, 4, 1, 9, 0, 0, 5],
-        [0, 0, 0, 0, 8, 0, 0, 7, 9]
+        [0, 0, 0, 0, 0, 0, 0, 0, 4],
+        [6, 0, 2, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 3, 1, 9, 0, 0, 0],
+        [0, 1, 3, 0, 2, 0, 0, 0, 0],
+        [0, 9, 0, 8, 0, 0, 5, 0, 0],
+        [0, 7, 0, 0, 0, 0, 3, 0, 0],
+        [4, 0, 0, 0, 0, 0, 0, 6, 0],
+        [0, 0, 0, 7, 0, 3, 0, 9, 0],
+        [0, 0, 0, 9, 0, 6, 0, 8, 0]
     ]
     return puzzle
 
@@ -46,28 +46,6 @@ def solve_cell(row, col, puzzle):
                 puzzle[row][col] = 0  # Backtrack if the solution is not valid
         return row, col, 0  # Return None if no valid move found
     return row, col, puzzle[row][col]  # Return the same number if the cell is already filled
-
-# def solve_cell(row, col, puzzle):
-#     if puzzle[row][col] == 0:
-#         valid_moves = []
-#         for num in range(1, 10):
-#             if is_valid_move(puzzle, row, col, num):
-#                 valid_moves.append(num)
-#                 if len(valid_moves) > 1:
-#                     # If there are more than one valid move, return (row, col, 0)
-#                     return row, col, 0
-        
-#         if len(valid_moves) == 1:
-#             # If there is only one valid move, return the solution
-#             num = valid_moves[0]
-#             puzzle[row][col] = num
-#             return row, col, num
-#         else:
-#             # If no valid move found, return (row, col, 0)
-#             return row, col, 0
-#     else:
-#         # If the cell is already filled, return the number in the cell
-#         return row, col, puzzle[row][col]
 
 def find_empty_cell(puzzle):
     for row in range(9):
