@@ -23,13 +23,13 @@ def crack_password(hash_algorithm, hashed_password, candidate):
     else:
         return False  # Password not cracked
 
-# Define custom accumulator to store password found status
-class PasswordFoundAccumulatorParam(AccumulatorParam):
-    def zero(self, initialValue):
-        return initialValue
+# # Define custom accumulator to store password found status
+# class PasswordFoundAccumulatorParam(AccumulatorParam):
+#     def zero(self, initialValue):
+#         return initialValue
 
-    def addInPlace(self, v1, v2):
-        return v1 or v2
+#     def addInPlace(self, v1, v2):
+#         return v1 or v2
 
 # Initialize Spark session
 sparkconf = SparkConf().setAppName("Sudoku Solver") \
@@ -53,8 +53,8 @@ user_script_module = None
 user_script_filename = None
 hashed_password = None
 
-# Initialize shared accumulator for indicating password found status
-password_found = sparkcontext.accumulator(False, PasswordFoundAccumulatorParam())
+# # Initialize shared accumulator for indicating password found status
+# password_found = sparkcontext.accumulator(False, PasswordFoundAccumulatorParam())
 
 async def retrieve_file(ftp_server, ftp_username, ftp_password, remote_filename, local_filename):
     try:
@@ -105,16 +105,13 @@ async def load_user_script():
         print(f"Error loading user script: {e}")
 
 def execute_task(chunk):
-    global password_found
     print("Executing task at worker")
     try:
-        if not password_found.value:
-            for task in chunk:
-                candidate = ''.join(task)
-                if crack_password("sha1", hashed_password, candidate):
-                    print(f"password found: {candidate}")
-                    password_found.add(True)  # Update accumulator if password is found
-                    return candidate
+        for task in chunk:
+            candidate = ''.join(task)
+            if crack_password("sha1", hashed_password, candidate):
+                print(f"password found: {candidate}")
+                return candidate
     except Exception as e:
         print(f"Error cracking password: {e}")
         return None
@@ -174,7 +171,7 @@ async def main():
                             if user_script_module is not None:
                                 chunk_size = 10000
                                 combinations_generator = generate_combinations()
-                                while not password_found.value:
+                                while True:
                                     combinations_chunk, combinations_generator = generate_chunks(chunk_size, combinations_generator)
                                     if combinations_chunk:
                                         password = sparkcontext.parallelize([combinations_chunk]).map(lambda chunk: execute_task(chunk)).filter(lambda x: x is not None).collect()
