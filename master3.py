@@ -147,7 +147,7 @@ async def main():
                             # Ensure user script is loaded before cracking password
                             if user_script_module is not None:
                                 # Define chunk size
-                                chunk_size = 10000  # Adjust as needed
+                                chunk_size = 5000  # Adjust as needed
                                 start_index = 1
                                 while True:
                                     end_index = start_index + 4  # Max password length
