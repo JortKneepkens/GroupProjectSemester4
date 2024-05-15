@@ -95,7 +95,7 @@ async def load_user_script():
     except Exception as e:
         print(f"Error loading user script: {e}")
 
-async def crack_password(task):
+async def execute_task(task):
     global password_found
     try:
         if not password_found.value:  # Check if password is already found
@@ -146,21 +146,21 @@ async def main():
                             hashed_password = message_content
                             # Ensure user script is loaded before cracking password
                             if user_script_module is not None:
-                                # Generate dynamic task chunks based on available workers and network conditions
-                                print("User script module")
-                                tasks = generate_password_tasks(4)
-                                # Execute tasks using Spark
-                                print("Distributing tasks")
-                                results = sparkcontext.parallelize(tasks).map(crack_password).filter(lambda x: x is not None).collect()
-                                print("Collecting results")
-                                print(results)
-                                # Process results
-                                if any(results):
-                                    print("Password cracked:", results[0])
-                                    # Perform further actions with the cracked password
-                                    return  # Terminate task execution once password is found
-                                else:
-                                    print("Password not cracked.")
+                                # Define chunk size
+                                chunk_size = 10000  # Adjust as needed
+                                start_index = 1
+                                while True:
+                                    end_index = start_index + 4  # Max password length
+                                    tasks = generate_password_tasks(start_index, end_index)
+                                    chunk = tasks[:chunk_size]
+                                    if not chunk:
+                                        print("All combinations tried. Password not found.")
+                                        break
+                                    results = sparkcontext.parallelize(chunk, len(chunk)).map(execute_task).filter(lambda x: x is not None).collect()
+                                    if any(results):
+                                        print("Password cracked:", results[0])
+                                        return  # Terminate task execution once password is found
+                                    start_index = end_index
                             else:
                                 print("No user script module")
                     except json.JSONDecodeError as e:
@@ -189,20 +189,18 @@ async def main():
                 # Invoke the cleanup function on each worker
                 sparkcontext.parallelize([1]).foreach(lambda x: cloudpickle.loads(serialized_cleanup)(user_script_filename))
 
-# Define tasks for workers
-def generate_password_tasks(max_length):
-    # Generate all possible password combinations up to the specified maximum length.
+# Generate password tasks dynamically
+def generate_password_tasks(start_index, end_index):
     tasks = []
     try:
-        print("Generating tasks up to length:", max_length)
-        for length in range(1, max_length + 1):
-            print("Generating tasks for length:", length)
-            for combination in itertools.product(CHARACTER_SPACE, repeat=length):
+        print(f"Start index {start_index}" )
+        print(f"End index {end_index}" )
+        for i in range(start_index, end_index):
+            print(f"Creating tasks fo index {i}" )
+            for combination in itertools.product(CHARACTER_SPACE, repeat=i):
                 tasks.append(combination)
-        print("Total tasks generated:", len(tasks))
     except Exception as e:
         print(f"Error generating tasks: {e}")
-        print(e)
     return tasks
 
 asyncio.run(main())
