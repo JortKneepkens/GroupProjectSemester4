@@ -90,7 +90,6 @@ async def crack_password(task):
     global password_found
     try:
         if not password_found:  # Continue cracking only if password is not found
-            print(task)
             candidate = ''.join(task)
             if user_script_module.crack_password("sha1", hashed_password, candidate):
                 password_found = True  # Set flag if password is found
