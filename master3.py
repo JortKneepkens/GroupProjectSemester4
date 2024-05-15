@@ -183,20 +183,19 @@ async def main():
 
 # Define tasks for workers
 def generate_password_tasks(max_length):
-    """Generate all possible password combinations up to the specified maximum length."""
+    #Generate all possible password combinations up to the specified maximum length.
+    tasks = []
     try:
-        print("Generating tasks")
-        print(CHARACTER_SPACE)
-        tasks = []
+        print("Generating tasks up to length:", max_length)
         for length in range(1, max_length + 1):
-            print(length)
+            print("Generating tasks for length:", length)
             for combination in itertools.product(CHARACTER_SPACE, repeat=length):
                 tasks.append(combination)
-        print(tasks)
-        return tasks
+        print("Total tasks generated:", len(tasks))
     except Exception as e:
-                print(f"Error generating tasks: {e}")
-                print(e)
+        print(f"Error generating tasks: {e}")
+        print(e)
+    return tasks
 
 asyncio.run(main())
 # Stop Spark session
