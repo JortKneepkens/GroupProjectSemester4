@@ -27,7 +27,7 @@ ftp_username = "sparkmaster"
 ftp_password = "P@ssword"
 
 # Define character space
-CHARACTER_SPACE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?/~"
+CHARACTER_SPACE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 user_script_module = None
 user_script_filename = None
