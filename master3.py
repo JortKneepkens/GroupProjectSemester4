@@ -99,6 +99,7 @@ async def crack_password(task):
     global password_found
     try:
         if not password_found:  # Continue cracking only if password is not found
+            print(task)
             candidate = ''.join(task)
             if user_script_module.crack_password("sha1", hashed_password, candidate):
                 password_found = True  # Set flag if password is found
@@ -145,12 +146,15 @@ async def main():
                             print("Received hashed password:", message_content)
                             hashed_password = message_content
                             # Ensure user script is loaded before cracking password
-                            # Ensure user script is loaded before cracking password
                             if user_script_module is not None:
                                 # Generate dynamic task chunks based on available workers and network conditions
+                                print("User script module")
                                 tasks = generate_password_tasks(6)
+                                print("Tasks:")
+                                print(tasks)
                                 # Execute tasks using Spark
                                 results = sparkcontext.parallelize(tasks).map(crack_password).collect()
+                                print(results)
                                 # Process results
                                 if any(results):
                                     print("Password cracked:", results[0])
@@ -158,6 +162,8 @@ async def main():
                                     return  # Terminate task execution once password is found
                                 else:
                                     print("Password not cracked.")
+                            else:
+                                print("No user script module")
                     except json.JSONDecodeError as e:
                         print(f"Error decoding JSON: {e}")
                     except Exception as e:
