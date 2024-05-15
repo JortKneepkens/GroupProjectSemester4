@@ -1,13 +1,21 @@
 import itertools
 import os
 import sys
-from pyspark import SparkContext, SparkConf
+from pyspark import SparkContext, SparkConf, AccumulatorParam
 import ftplib
 import websockets
 import asyncio
 import json
 import importlib
 import cloudpickle
+
+# Define custom accumulator to store password found status
+class PasswordFoundAccumulatorParam(AccumulatorParam):
+    def zero(self, initialValue):
+        return initialValue
+
+    def addInPlace(self, v1, v2):
+        return v1 or v2
 
 # Initialize Spark session
 sparkconf = SparkConf().setAppName("Sudoku Solver") \
@@ -16,7 +24,6 @@ sparkconf = SparkConf().setAppName("Sudoku Solver") \
                         .set("spark.driver.bindAddress", "10.0.0.4") \
                         .set("spark.driver.port","50243") \
                         .set("spark.executor.memoryOverhead", "512m")  # Additional overhead for each executor
-
 
 sparkcontext = SparkContext(conf=sparkconf)
 
@@ -32,7 +39,9 @@ CHARACTER_SPACE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345678
 user_script_module = None
 user_script_filename = None
 hashed_password = None
-password_found = False
+
+# Initialize shared accumulator for indicating password found status
+password_found = sparkcontext.accumulator(False, PasswordFoundAccumulatorParam())
 
 async def retrieve_file(ftp_server, ftp_username, ftp_password, remote_filename, local_filename):
     try:
@@ -89,10 +98,10 @@ async def load_user_script():
 async def crack_password(task):
     global password_found
     try:
-        if not password_found:  # Continue cracking only if password is not found
+        if not password_found.value:  # Check if password is already found
             candidate = ''.join(task)
             if user_script_module.crack_password("sha1", hashed_password, candidate):
-                password_found = True  # Set flag if password is found
+                password_found.add(True)  # Update accumulator if password is found
                 return candidate
     except Exception as e:
         print(f"Error cracking password: {e}")
@@ -139,7 +148,7 @@ async def main():
                             if user_script_module is not None:
                                 # Generate dynamic task chunks based on available workers and network conditions
                                 print("User script module")
-                                tasks = generate_password_tasks(4)
+                                tasks = generate_password_tasks(5)
                                 # Execute tasks using Spark
                                 results = sparkcontext.parallelize([tasks]).map(crack_password).filter(lambda x: x is not None).collect()
                                 print("Collecting results")
@@ -161,7 +170,7 @@ async def main():
                 print(f"Error connecting to WebSocket server: {e}")
                 print(e)
                 print("Retrying...")
-                await asyncio.sleep(10)  # Wacht 5 seconden voordat opnieuw wordt geprobeerd
+                await asyncio.sleep(10)  # Wait before retrying
         finally:
             # Cleanup resources when WebSocket connection is closed or error occurs
             if user_script_filename:
@@ -181,7 +190,7 @@ async def main():
 
 # Define tasks for workers
 def generate_password_tasks(max_length):
-    #Generate all possible password combinations up to the specified maximum length.
+    # Generate all possible password combinations up to the specified maximum length.
     tasks = []
     try:
         print("Generating tasks up to length:", max_length)
