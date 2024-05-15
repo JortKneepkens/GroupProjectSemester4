@@ -141,7 +141,7 @@ async def main():
                             if await retrieve_file(ftp_server, ftp_username, ftp_password, message_content, user_script_filename):
                                 sparkcontext.addFile(user_script_filename)
                                 await load_user_script()  # Load user script once
-                        elif message_type == "Hashed_Password":
+                        elif message_type == "Message":
                             print("Received hashed password:", message_content)
                             hashed_password = message_content
                             # Ensure user script is loaded before cracking password
