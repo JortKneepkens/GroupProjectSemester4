@@ -192,6 +192,7 @@ def generate_password_tasks(max_length):
             print(length)
             for combination in itertools.product(CHARACTER_SPACE, repeat=length):
                 tasks.append(combination)
+        print(tasks)
         return tasks
     except Exception as e:
                 print(f"Error generating tasks: {e}")
