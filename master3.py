@@ -162,7 +162,7 @@ async def main():
                                 start_index = 0
                                 end_index = chunk_size
                                 while not password_found.value:
-                                    combinations_chunk = list(next(generate_combinations(start_index, end_index)))
+                                    combinations_chunk = list(generate_combinations(start_index, end_index))
                                     if combinations_chunk:
                                         print(combinations_chunk)
                                         print(f"Start index: {start_index}")
