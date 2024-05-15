@@ -112,6 +112,7 @@ def execute_task(chunk):
             for task in chunk:
                 candidate = ''.join(task)
                 if crack_password("sha1", hashed_password, candidate):
+                    print(f"password found: {candidate}")
                     password_found.add(True)  # Update accumulator if password is found
                     return candidate
     except Exception as e:
