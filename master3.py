@@ -95,7 +95,7 @@ async def load_user_script():
     except Exception as e:
         print(f"Error loading user script: {e}")
 
-async def execute_task(task):
+def execute_task(task):
     global password_found
     try:
         if not password_found.value:  # Check if password is already found
