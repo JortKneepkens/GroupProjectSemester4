@@ -9,6 +9,17 @@ import json
 import importlib
 import cloudpickle
 
+import hashlib
+
+def crack_password(hash_algorithm, hashed_password, candidate):
+    # Hash the candidate password using the specified algorithm
+    hashed_candidate = hashlib.new(hash_algorithm, candidate.encode()).hexdigest()
+    # Compare the hashed candidate with the provided hashed password
+    if hashed_candidate == hashed_password:
+        return True  # Password cracked successfully
+    else:
+        return False  # Password not cracked
+
 # Define custom accumulator to store password found status
 class PasswordFoundAccumulatorParam(AccumulatorParam):
     def zero(self, initialValue):
@@ -27,13 +38,12 @@ sparkconf = SparkConf().setAppName("Sudoku Solver") \
 
 sparkcontext = SparkContext(conf=sparkconf)
 
-websocket_uri = "ws://10.0.0.14:8181"  # Replace with the WebSocket server URI
+websocket_uri = "ws://10.0.0.14:8181" 
 
 ftp_server = "192.168.0.2"
 ftp_username = "sparkmaster"
 ftp_password = "P@ssword"
 
-# Define character space
 CHARACTER_SPACE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 user_script_module = None
@@ -55,7 +65,6 @@ async def retrieve_file(ftp_server, ftp_username, ftp_password, remote_filename,
 
         print(f"File '{remote_filename}' downloaded successfully to '{local_filename}'")
         
-        # Log the content of the downloaded file
         with open(local_filename, 'r') as f:
             file_content = f.read()
             print("File content:")
@@ -66,7 +75,6 @@ async def retrieve_file(ftp_server, ftp_username, ftp_password, remote_filename,
         print(f"Error downloading file from FTP: {e}")
         return False
     finally:
-        # Close the FTP connection
         ftp.quit()
 
 async def delete_file_from_ftp(ftp_server, ftp_username, ftp_password, filename):
@@ -75,7 +83,6 @@ async def delete_file_from_ftp(ftp_server, ftp_username, ftp_password, filename)
         ftp = ftplib.FTP(ftp_server)
         ftp.login(ftp_username, ftp_password)
 
-        # Delete the file
         ftp.delete(filename)
         print(f"File '{filename}' deleted successfully from FTP server.")
         return True
@@ -83,7 +90,6 @@ async def delete_file_from_ftp(ftp_server, ftp_username, ftp_password, filename)
         print(f"Error deleting file from FTP: {e}")
         return False
     finally:
-        # Close the FTP connection
         ftp.quit()
 
 async def load_user_script():
@@ -98,26 +104,15 @@ async def load_user_script():
 def execute_task(chunk):
     global password_found
     try:
-        if not password_found.value:  # Check if password is already found
+        if not password_found.value:
             for task in chunk:
                 candidate = ''.join(task)
-                if user_script_module.crack_password("sha1", hashed_password, candidate):
+                if crack_password("sha1", hashed_password, candidate):
                     password_found.add(True)  # Update accumulator if password is found
                     return candidate
     except Exception as e:
         print(f"Error cracking password: {e}")
         return None
-
-# def generate_combinations(start_index, end_index):
-#     max_password_length = 6
-#     total_combinations = 0
-#     for length in range(1, max_password_length + 1):
-#         for combination in itertools.product(CHARACTER_SPACE, repeat=length):
-#             total_combinations += 1
-#             if start_index <= total_combinations <= end_index:
-#                 yield combination
-#             if total_combinations >= end_index:
-#                 return
 
 def generate_combinations():
     max_password_length = 6
@@ -132,7 +127,6 @@ def generate_chunks(chunk_size, combinations_generator):
             combination = next(combinations_generator)
             chunk.append(combination)
         except StopIteration:
-            # If there are no more combinations to generate, break the loop
             break
     return chunk, combinations_generator
 
@@ -158,7 +152,6 @@ async def main():
         try:
             async with websockets.connect(websocket_uri) as websocket:
                 print("Connected.")
-                # Receive messages until the connection is closed
                 async for message in websocket:
                     try:
                         parsed_message = json.loads(message)
@@ -173,27 +166,8 @@ async def main():
                         elif message_type == "Message":
                             print("Received hashed password:", message_content)
                             hashed_password = message_content
-                            # Ensure user script is loaded before cracking password
                             if user_script_module is not None:
-                                # # Define chunk size
-                                # chunk_size = 10000  # Adjust as needed
-                                # start_index = 0
-                                # while not password_found.value:
-                                #     combinations_chunk = list(generate_combinations(start_index, start_index + chunk_size - 1))
-                                #     if combinations_chunk:
-                                #         print(combinations_chunk)
-                                #         print(f"Start index: {start_index}")
-                                #         print(f"End index: {start_index + chunk_size - 1}")
-                                #         password = sparkcontext.parallelize([combinations_chunk]).map(execute_task).filter(lambda x: x is not None).collect()
-                                #         if password:
-                                #             print("Password found:", password[0])  # Print the password
-                                #             return
-                                #         start_index += chunk_size
-                                #     else:
-                                #         print("No more combinations to try.")
-                                #         break
-                                # Define chunk size
-                                chunk_size = 10000  # Adjust as needed
+                                chunk_size = 10000
                                 combinations_generator = generate_combinations()
                                 while not password_found.value:
                                     combinations_chunk, combinations_generator = generate_chunks(chunk_size, combinations_generator)
@@ -201,11 +175,11 @@ async def main():
                                         print(combinations_chunk)
                                         password = sparkcontext.parallelize([combinations_chunk]).map(execute_task).filter(lambda x: x is not None).collect()
                                         if password:
-                                            print("Password found:", password[0])  # Print the password
-                                            break  # Exit the loop when password is found
+                                            print("Password found:", password[0]) 
+                                            break 
                                     else:
                                         print("No more combinations to try.")
-                                        break  # Exit the loop if no more combinations are available
+                                        break 
                             else:
                                 print("No user script module")
                     except json.JSONDecodeError as e:
@@ -216,7 +190,7 @@ async def main():
                 print(f"Error connecting to WebSocket server: {e}")
                 print(e)
                 print("Retrying...")
-                await asyncio.sleep(10)  # Wait before retrying
+                await asyncio.sleep(10)
         finally:
             # Cleanup resources when WebSocket connection is closed or error occurs
             if user_script_filename:
