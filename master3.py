@@ -175,7 +175,10 @@ async def main():
                                 while not password_found.value:
                                     combinations_chunk, combinations_generator = generate_chunks(chunk_size, combinations_generator)
                                     if combinations_chunk:
-                                        password = sparkcontext.parallelize([combinations_chunk]).map(execute_task).filter(lambda x: x is not None).collect()
+                                        # Convert the combinations_chunk to an RDD with a single partition
+                                        rdd = sparkcontext.parallelize([combinations_chunk], numSlices=1)
+                                        # Apply the execute_task function to the single partition RDD
+                                        password = rdd.map(execute_task).filter(lambda x: x is not None).collect()
                                         if password:
                                             print("Password found:", password[0]) 
                                             break 
