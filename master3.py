@@ -108,16 +108,22 @@ def execute_task(chunk):
         print(f"Error cracking password: {e}")
         return None
 
-def generate_combinations(start_index, end_index):
+# def generate_combinations(start_index, end_index):
+#     max_password_length = 6
+#     total_combinations = 0
+#     for length in range(1, max_password_length + 1):
+#         for combination in itertools.product(CHARACTER_SPACE, repeat=length):
+#             total_combinations += 1
+#             if start_index <= total_combinations <= end_index:
+#                 yield combination
+#             if total_combinations >= end_index:
+#                 return
+
+def generate_combinations():
     max_password_length = 6
-    total_combinations = 0
     for length in range(1, max_password_length + 1):
         for combination in itertools.product(CHARACTER_SPACE, repeat=length):
-            total_combinations += 1
-            if start_index <= total_combinations <= end_index:
-                yield combination
-            if total_combinations >= end_index:
-                return
+            yield combination
 
 # Define the cleanup function
 def cleanup(local_filename):
@@ -158,20 +164,36 @@ async def main():
                             hashed_password = message_content
                             # Ensure user script is loaded before cracking password
                             if user_script_module is not None:
+                                # # Define chunk size
+                                # chunk_size = 10000  # Adjust as needed
+                                # start_index = 0
+                                # while not password_found.value:
+                                #     combinations_chunk = list(generate_combinations(start_index, start_index + chunk_size - 1))
+                                #     if combinations_chunk:
+                                #         print(combinations_chunk)
+                                #         print(f"Start index: {start_index}")
+                                #         print(f"End index: {start_index + chunk_size - 1}")
+                                #         password = sparkcontext.parallelize([combinations_chunk]).map(execute_task).filter(lambda x: x is not None).collect()
+                                #         if password:
+                                #             print("Password found:", password[0])  # Print the password
+                                #             return
+                                #         start_index += chunk_size
+                                #     else:
+                                #         print("No more combinations to try.")
+                                #         break
                                 # Define chunk size
                                 chunk_size = 10000  # Adjust as needed
-                                start_index = 0
                                 while not password_found.value:
-                                    combinations_chunk = list(generate_combinations(start_index, start_index + chunk_size - 1))
+                                    combinations_chunk = []
+                                    for _ in range(chunk_size):
+                                        combination = next(generate_combinations())
+                                        combinations_chunk.append(combination)
                                     if combinations_chunk:
                                         print(combinations_chunk)
-                                        print(f"Start index: {start_index}")
-                                        print(f"End index: {start_index + chunk_size - 1}")
                                         password = sparkcontext.parallelize([combinations_chunk]).map(execute_task).filter(lambda x: x is not None).collect()
                                         if password:
                                             print("Password found:", password[0])  # Print the password
                                             return
-                                        start_index += chunk_size
                                     else:
                                         print("No more combinations to try.")
                                         break
