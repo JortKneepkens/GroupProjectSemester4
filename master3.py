@@ -182,7 +182,7 @@ async def main():
                                 #         print("No more combinations to try.")
                                 #         break
                                 # Define chunk size
-                                chunk_size = 10000  # Adjust as needed
+                                chunk_size = 20000  # Adjust as needed
                                 while not password_found.value:
                                     combinations_chunk = []
                                     for _ in range(chunk_size):
