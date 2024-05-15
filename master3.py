@@ -95,17 +95,28 @@ async def load_user_script():
     except Exception as e:
         print(f"Error loading user script: {e}")
 
-def execute_task(task):
+def execute_task(chunk):
     global password_found
     try:
         if not password_found.value:  # Check if password is already found
-            candidate = ''.join(task)
-            if user_script_module.crack_password("sha1", hashed_password, candidate):
-                password_found.add(True)  # Update accumulator if password is found
-                return candidate
+            for task in chunk:
+                candidate = ''.join(task)
+                if user_script_module.crack_password("sha1", hashed_password, candidate):
+                    password_found.add(True)  # Update accumulator if password is found
+                    return candidate
     except Exception as e:
         print(f"Error cracking password: {e}")
         return None
+
+def generate_combinations(start_index, end_index):
+    max_password_length = 6
+    for length in range(1, max_password_length + 1):
+        for combination in itertools.product(CHARACTER_SPACE, repeat=length):
+            if start_index <= end_index:
+                yield combination
+                start_index += 1
+            else:
+                return
 
 # Define the cleanup function
 def cleanup(local_filename):
@@ -147,20 +158,21 @@ async def main():
                             # Ensure user script is loaded before cracking password
                             if user_script_module is not None:
                                 # Define chunk size
-                                chunk_size = 5000  # Adjust as needed
-                                start_index = 1
-                                while True:
-                                    end_index = start_index + 4  # Max password length
-                                    tasks = generate_password_tasks(start_index, end_index)
-                                    chunk = tasks[:chunk_size]
-                                    if not chunk:
-                                        print("All combinations tried. Password not found.")
+                                chunk_size = 10000  # Adjust as needed
+                                start_index = 0
+                                end_index = chunk_size
+                                while not password_found.value:
+                                    combinations_chunk = list(generate_combinations(start_index, end_index))
+                                    if combinations_chunk:
+                                        password = sparkcontext.parallelize([combinations_chunk]).map(execute_task).filter(lambda x: x is not None).collect()
+                                        if password:
+                                            print("Password found:", password[0])  # Print the password
+                                            return
+                                        start_index = end_index + 1
+                                        end_index += chunk_size
+                                    else:
+                                        print("No more combinations to try.")
                                         break
-                                    results = sparkcontext.parallelize(chunk, len(chunk)).map(execute_task).filter(lambda x: x is not None).collect()
-                                    if any(results):
-                                        print("Password cracked:", results[0])
-                                        return  # Terminate task execution once password is found
-                                    start_index = end_index
                             else:
                                 print("No user script module")
                     except json.JSONDecodeError as e:
@@ -188,20 +200,6 @@ async def main():
                 os.remove(user_script_filename)
                 # Invoke the cleanup function on each worker
                 sparkcontext.parallelize([1]).foreach(lambda x: cloudpickle.loads(serialized_cleanup)(user_script_filename))
-
-# Generate password tasks dynamically
-def generate_password_tasks(start_index, end_index):
-    tasks = []
-    try:
-        print(f"Start index {start_index}" )
-        print(f"End index {end_index}" )
-        for i in range(start_index, end_index):
-            print(f"Creating tasks fo index {i}" )
-            for combination in itertools.product(CHARACTER_SPACE, repeat=i):
-                tasks.append(combination)
-    except Exception as e:
-        print(f"Error generating tasks: {e}")
-    return tasks
 
 asyncio.run(main())
 # Stop Spark session
