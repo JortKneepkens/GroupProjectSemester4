@@ -34,15 +34,6 @@ user_script_filename = None
 hashed_password = None
 password_found = False
 
-# Define tasks for workers
-def generate_password_tasks(max_length):
-    """Generate all possible password combinations up to the specified maximum length."""
-    tasks = []
-    for length in range(1, max_length + 1):
-        for combination in itertools.product(CHARACTER_SPACE, repeat=length):
-            tasks.append(combination)
-    return tasks
-
 async def retrieve_file(ftp_server, ftp_username, ftp_password, remote_filename, local_filename):
     try:
         # Connect to the FTP server
@@ -189,6 +180,22 @@ async def main():
                 os.remove(user_script_filename)
                 # Invoke the cleanup function on each worker
                 sparkcontext.parallelize([1]).foreach(lambda x: cloudpickle.loads(serialized_cleanup)(user_script_filename))
+
+# Define tasks for workers
+def generate_password_tasks(max_length):
+    """Generate all possible password combinations up to the specified maximum length."""
+    try:
+        print("Generating tasks")
+        print(CHARACTER_SPACE)
+        tasks = []
+        for length in range(1, max_length + 1):
+            print(length)
+            for combination in itertools.product(CHARACTER_SPACE, repeat=length):
+                tasks.append(combination)
+        return tasks
+    except Exception as e:
+                print(f"Error generating tasks: {e}")
+                print(e)
 
 asyncio.run(main())
 # Stop Spark session
