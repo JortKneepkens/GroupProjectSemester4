@@ -125,8 +125,7 @@ def generate_combinations():
         for combination in itertools.product(CHARACTER_SPACE, repeat=length):
             yield combination
 
-def generate_chunks(chunk_size):
-    combinations_generator = generate_combinations()
+def generate_chunks(chunk_size, combinations_generator):
     chunk = []
     for _ in range(chunk_size):
         try:
@@ -135,7 +134,7 @@ def generate_chunks(chunk_size):
         except StopIteration:
             # If there are no more combinations to generate, break the loop
             break
-    return chunk
+    return chunk, combinations_generator
 
 # Define the cleanup function
 def cleanup(local_filename):
@@ -195,8 +194,9 @@ async def main():
                                 #         break
                                 # Define chunk size
                                 chunk_size = 10000  # Adjust as needed
+                                combinations_generator = generate_combinations()
                                 while not password_found.value:
-                                    combinations_chunk = generate_chunks(chunk_size)
+                                    combinations_chunk, combinations_generator = generate_chunks(chunk_size, combinations_generator)
                                     if combinations_chunk:
                                         print(combinations_chunk)
                                         password = sparkcontext.parallelize([combinations_chunk]).map(execute_task).filter(lambda x: x is not None).collect()
