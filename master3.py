@@ -140,7 +140,7 @@ async def main():
                             if user_script_module is not None:
                                 # Generate dynamic task chunks based on available workers and network conditions
                                 print("User script module")
-                                tasks = generate_password_tasks(6)
+                                tasks = generate_password_tasks(5)
                                 print("Tasks:")
                                 print(tasks)
                                 # Execute tasks using Spark
