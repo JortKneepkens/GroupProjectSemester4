@@ -162,19 +162,6 @@ async def main():
                         print(f"Error decoding JSON: {e}")
                     except Exception as e:
                         print(f"Error processing message: {e}")
-                    finally:
-                        print("Deleting file")
-                        # Delete the file from the FTP server
-                        await delete_file_from_ftp(ftp_server, ftp_username, ftp_password, message_content)
-                        
-                        # Unload the module to free up memory
-                        del sys.modules[user_script_filename[:-3]]
-                        importlib.invalidate_caches()
-                        
-                        # Delete the file from the local filesystem
-                        os.remove(user_script_filename)
-                        # Invoke the cleanup function on each worker
-                        sparkcontext.parallelize([1]).foreach(lambda x: cloudpickle.loads(serialized_cleanup)(user_script_filename))
         except Exception as e:
                 print(f"Error connecting to WebSocket server: {e}")
                 print(e)
