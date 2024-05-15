@@ -148,7 +148,7 @@ async def main():
                             if user_script_module is not None:
                                 # Generate dynamic task chunks based on available workers and network conditions
                                 print("User script module")
-                                tasks = generate_password_tasks(5)
+                                tasks = generate_password_tasks(4)
                                 # Execute tasks using Spark
                                 results = sparkcontext.parallelize([tasks]).map(crack_password).filter(lambda x: x is not None).collect()
                                 print("Collecting results")
