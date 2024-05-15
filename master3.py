@@ -125,6 +125,18 @@ def generate_combinations():
         for combination in itertools.product(CHARACTER_SPACE, repeat=length):
             yield combination
 
+def generate_chunks(chunk_size):
+    combinations_generator = generate_combinations()
+    chunk = []
+    for _ in range(chunk_size):
+        try:
+            combination = next(combinations_generator)
+            chunk.append(combination)
+        except StopIteration:
+            # If there are no more combinations to generate, break the loop
+            break
+    return chunk
+
 # Define the cleanup function
 def cleanup(local_filename):
     # Delete the file from the local filesystem
@@ -182,21 +194,18 @@ async def main():
                                 #         print("No more combinations to try.")
                                 #         break
                                 # Define chunk size
-                                chunk_size = 20000  # Adjust as needed
+                                chunk_size = 10000  # Adjust as needed
                                 while not password_found.value:
-                                    combinations_chunk = []
-                                    for _ in range(chunk_size):
-                                        combination = next(generate_combinations())
-                                        combinations_chunk.append(combination)
+                                    combinations_chunk = generate_chunks(chunk_size)
                                     if combinations_chunk:
                                         print(combinations_chunk)
                                         password = sparkcontext.parallelize([combinations_chunk]).map(execute_task).filter(lambda x: x is not None).collect()
                                         if password:
                                             print("Password found:", password[0])  # Print the password
-                                            return
+                                            break  # Exit the loop when password is found
                                     else:
                                         print("No more combinations to try.")
-                                        break
+                                        break  # Exit the loop if no more combinations are available
                             else:
                                 print("No user script module")
                     except json.JSONDecodeError as e:
