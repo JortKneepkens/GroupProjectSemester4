@@ -150,7 +150,8 @@ async def main():
                                 print("User script module")
                                 tasks = generate_password_tasks(4)
                                 # Execute tasks using Spark
-                                results = sparkcontext.parallelize([tasks]).map(crack_password).filter(lambda x: x is not None).collect()
+                                print("Distributing tasks")
+                                results = sparkcontext.parallelize(tasks).map(crack_password).filter(lambda x: x is not None).collect()
                                 print("Collecting results")
                                 print(results)
                                 # Process results
