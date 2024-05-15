@@ -14,6 +14,9 @@ import hashlib
 def crack_password(hash_algorithm, hashed_password, candidate):
     # Hash the candidate password using the specified algorithm
     hashed_candidate = hashlib.new(hash_algorithm, candidate.encode()).hexdigest()
+    if candidate == 'abc':
+        print("PASSWORD abc: ")
+        print(hashed_candidate)
     # Compare the hashed candidate with the provided hashed password
     if hashed_candidate == hashed_password:
         return True  # Password cracked successfully
@@ -172,7 +175,6 @@ async def main():
                                 while not password_found.value:
                                     combinations_chunk, combinations_generator = generate_chunks(chunk_size, combinations_generator)
                                     if combinations_chunk:
-                                        print(combinations_chunk)
                                         password = sparkcontext.parallelize([combinations_chunk]).map(execute_task).filter(lambda x: x is not None).collect()
                                         if password:
                                             print("Password found:", password[0]) 
