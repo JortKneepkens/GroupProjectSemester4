@@ -12,16 +12,17 @@ import cloudpickle
 import hashlib
 
 def crack_password(hash_algorithm, hashed_password, candidate):
-    # Hash the candidate password using the specified algorithm
-    hashed_candidate = hashlib.new(hash_algorithm, candidate.encode()).hexdigest()
-    if candidate == 'abc':
-        print("PASSWORD abc: ")
-        print(hashed_candidate)
-    # Compare the hashed candidate with the provided hashed password
-    if hashed_candidate == hashed_password:
-        return True  # Password cracked successfully
-    else:
-        return False  # Password not cracked
+    try:
+        # Hash the candidate password using the specified algorithm
+        hashed_candidate = hashlib.new(hash_algorithm, candidate.encode()).hexdigest()
+        # Compare the hashed candidate with the provided hashed password
+        if hashed_candidate == hashed_password:
+            return True  # Password cracked successfully
+        else:
+            return False  # Password not cracked
+    except Exception as e:
+        print(f"Error hashing or cracking password: {e}")
+        return False
 
 # # Define custom accumulator to store password found status
 # class PasswordFoundAccumulatorParam(AccumulatorParam):
@@ -32,7 +33,7 @@ def crack_password(hash_algorithm, hashed_password, candidate):
 #         return v1 or v2
 
 # Initialize Spark session
-sparkconf = SparkConf().setAppName("Sudoku Solver") \
+sparkconf = SparkConf().setAppName("Password Cracker") \
                         .setMaster("spark://10.0.0.4:7077") \
                         .set("spark.driver.host", "145.220.74.141") \
                         .set("spark.driver.bindAddress", "10.0.0.4") \
