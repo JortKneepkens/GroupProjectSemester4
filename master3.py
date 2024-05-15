@@ -164,6 +164,7 @@ async def main():
                                 while not password_found.value:
                                     combinations_chunk = list(generate_combinations(start_index, end_index))
                                     if combinations_chunk:
+                                        print(combinations_chunk)
                                         password = sparkcontext.parallelize([combinations_chunk]).map(execute_task).filter(lambda x: x is not None).collect()
                                         if password:
                                             print("Password found:", password[0])  # Print the password
