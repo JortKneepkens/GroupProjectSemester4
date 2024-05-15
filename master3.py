@@ -140,10 +140,9 @@ async def main():
                                 # Generate dynamic task chunks based on available workers and network conditions
                                 print("User script module")
                                 tasks = generate_password_tasks(4)
-                                print("Tasks:")
-                                print(tasks)
                                 # Execute tasks using Spark
                                 results = sparkcontext.parallelize(tasks).map(crack_password).collect()
+                                print("Collecting results")
                                 print(results)
                                 # Process results
                                 if any(results):
