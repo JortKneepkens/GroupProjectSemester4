@@ -254,9 +254,9 @@ async def main():
                                             elapsed_time = end_time - start_time  # Calculate the elapsed time
                                             print(f"Elapsed time: {elapsed_time} seconds")
                                             break
-                                        else:
-                                            print("No more chunks")
-                                            break
+                                    else:
+                                        print("No more chunks")
+                                        break
                             else:
                                 print("No user script module")
                     except json.JSONDecodeError as e:
