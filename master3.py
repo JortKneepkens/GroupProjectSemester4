@@ -215,13 +215,13 @@ async def main():
                                     
                                     # Allocate the chunk to a worker
                                     rdd = sparkcontext.parallelize(next(generating_chunks))
-                                    # Trigger RDD creation by performing an action
-                                    print(rdd)
                                     # Process chunks independently
-                                    passwords = rdd.map(lambda chunk: execute_task(chunk)).collect()
+                                    password = rdd.map(lambda chunk: execute_task(chunk)).filter(lambda x: x is not None).collect()
+                                    print(password)
                                     # Check if password is found
-                                    if any(passwords):
-                                        print("Password found:", [password for password in passwords if password])
+                                    print(f"Password: {password}")
+                                    if password:
+                                        print("Password found:", password[0]) 
                                         end_time = time.time()  # Record the end time
                                         elapsed_time = end_time - start_time  # Calculate the elapsed time
                                         print(f"Elapsed time: {elapsed_time} seconds")
