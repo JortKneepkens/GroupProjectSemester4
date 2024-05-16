@@ -233,7 +233,7 @@ async def main():
                                     combinations_chunk, combinations_generator = generate_chunks(chunk_size, combinations_generator)
                                     if combinations_chunk:
                                         print(combinations_chunk)
-                                        password = sparkcontext.parallelize(combinations_chunk).map(lambda chunk: execute_task(chunk)).filter(lambda x: x is not None).collect()
+                                        password = sparkcontext.parallelize([combinations_chunk]).map(lambda chunk: execute_task(chunk)).filter(lambda x: x is not None).collect()
                                         print(f"Password: {password}")
                                         if password:
                                             print("Password found:", password[0]) 
