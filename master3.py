@@ -199,8 +199,9 @@ async def main():
                                 while True:
                                     # Allocate chunks to workers
                                     rdd = sparkcontext.parallelize(allocate_chunks(chunk_size))
-                                    print(rdd)
-                                    print("parallelized")
+                                    # Trigger RDD creation by performing an action
+                                    rdd_count = rdd.count()
+                                    print("RDD created and parallelized")
                                     # Process chunks independently
                                     passwords = rdd.flatMap(lambda chunk: execute_task(chunk)).collect()
                                     print(passwords)
