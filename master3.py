@@ -47,8 +47,7 @@ sparkconf = SparkConf().setAppName("Password Cracker") \
                         .set("spark.driver.host", "145.220.74.141") \
                         .set("spark.driver.bindAddress", "10.0.0.4") \
                         .set("spark.driver.port","50243") \
-                        .set("spark.executor.memoryOverhead", "512m") \
-                        .set("spark.shuffle.service.enabled", "true")  # Enable external shuffle service
+                        .set("spark.executor.memoryOverhead", "512m")
 
 sparkcontext = SparkContext(conf=sparkconf)
 
@@ -204,46 +203,35 @@ async def main():
                             if user_script_module is not None:
                                 start_time = time.time()  # Record the start time
                                 chunk_size = 10000
-                                combinations_generator = generate_combinations()
+                                # combinations_generator = generate_combinations()
+                                # while True:
+                                #     combinations_chunk, combinations_generator = generate_chunks(chunk_size, combinations_generator)
+                                #     if combinations_chunk:
+                                #         print(combinations_chunk)
+                                #         password = sparkcontext.parallelize([combinations_chunk]).map(lambda chunk: execute_task(chunk)).filter(lambda x: x is not None).collect()
+                                #         print(f"Password: {password}")
+                                #         if password:
+                                #             print("Password found:", password[0]) 
+                                #             end_time = time.time()  # Record the end time
+                                #             elapsed_time = end_time - start_time  # Calculate the elapsed time
+                                #             print(f"Elapsed time: {elapsed_time} seconds")
+                                #             break 
+                                #     else:
+                                #         print("No more combinations to try.")
+                                #         break
                                 generating_chunks = allocate_chunks(chunk_size)
                                 while True:
-                                    # # Get the next chunk
-                                    # next_chunk = next(allocate_chunks(chunk_size), None)
-                                    
-                                    # if next_chunk is None:
-                                    #     # No more chunks available, exit the loop
-                                    #     print("No chunk")
-                                    #     break
-                                    
-                                    # Allocate the chunk to a worker
-                                    # rdd = sparkcontext.parallelize(next(generating_chunks))
-                                    # Process chunks independently
-                                    # next_chunk = next(generating_chunks)
-                                    # password = sparkcontext.parallelize([next(generating_chunks)]).map(execute_task).filter(lambda x: x is not None).collect()
-                                    # print(password)
-                                    # # Check if password is found
-                                    # print(f"Password: {password}")
-                                    # if password:
-                                    #     print("Password found:", password[0]) 
-                                    #     end_time = time.time()  # Record the end time
-                                    #     elapsed_time = end_time - start_time  # Calculate the elapsed time
-                                    #     print(f"Elapsed time: {elapsed_time} seconds")
-                                    #     break
-                                    
-                                    combinations_chunk, combinations_generator = generate_chunks(chunk_size, combinations_generator)
-                                    if combinations_chunk:
-                                        print(combinations_chunk)
-                                        password = sparkcontext.parallelize([combinations_chunk]).map(lambda chunk: execute_task(chunk)).filter(lambda x: x is not None).collect()
-                                        print(f"Password: {password}")
-                                        if password:
-                                            print("Password found:", password[0]) 
-                                            end_time = time.time()  # Record the end time
-                                            elapsed_time = end_time - start_time  # Calculate the elapsed time
-                                            print(f"Elapsed time: {elapsed_time} seconds")
-                                            break 
-                                    else:
-                                        print("No more combinations to try.")
+                                    next_chunk = next(generating_chunks, None)
+                                    if next_chunk is None:
                                         break
+                                    # Process chunk independently
+                                    passwords = sparkcontext.parallelize([next_chunk]).flatMap(execute_task).collect()
+                                    if passwords:
+                                        print("Password found:", passwords)
+                                        break
+                                end_time = time.time()  # Record the end time
+                                elapsed_time = end_time - start_time  # Calculate the elapsed time
+                                print(f"Elapsed time: {elapsed_time} seconds")
                             else:
                                 print("No user script module")
                     except json.JSONDecodeError as e:
