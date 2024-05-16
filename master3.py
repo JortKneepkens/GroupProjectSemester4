@@ -15,6 +15,7 @@ import hashlib
 def crack_password(hash_algorithm, hashed_password, candidate):
     try:
         # Convert candidate to string before encoding
+        print(f"Candidate: {candidate}")
         candidate_str = str(candidate)
         
         # Hash the candidate password using the specified algorithm
@@ -117,7 +118,7 @@ def execute_task(chunk: list):
     print("Executing task at worker")
     try:
         for task in chunk:
-            # candidate = ''.join(task)
+            print(f"Task: {task}")
             if crack_password("sha1", hashed_password, task):
                 print(f"password found: {task}")
                 return task
