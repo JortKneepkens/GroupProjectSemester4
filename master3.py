@@ -12,26 +12,26 @@ import time
 
 import hashlib
 
-def crack_password(hash_algorithm, hashed_password, candidate):
-    try:
-        # Convert candidate to string before encoding
-        candidate_str = str(candidate)
+# def crack_password(hash_algorithm, hashed_password, candidate):
+#     try:
+#         # Convert candidate to string before encoding
+#         candidate_str = str(candidate)
         
-        # Hash the candidate password using the specified algorithm
-        hashed_candidate = hashlib.new(hash_algorithm, candidate_str.encode()).hexdigest()
-        if(candidate == "abc1"):
-            print(f"Password: {candidate_str}, Hash: {hashed_candidate}")
-            print(f"Hashed password to crack: {hashed_password}")
+#         # Hash the candidate password using the specified algorithm
+#         hashed_candidate = hashlib.new(hash_algorithm, candidate_str.encode()).hexdigest()
+#         if(candidate == "abc1"):
+#             print(f"Password: {candidate_str}, Hash: {hashed_candidate}")
+#             print(f"Hashed password to crack: {hashed_password}")
         
-        if hashed_candidate == hashed_password:
-            print("Password found!")
-            print(f"Password: {candidate_str}")
-            return True  # Password cracked successfully
-        else:
-            return False  # Password not cracked
-    except Exception as e:
-        print(f"Error hashing or cracking password: {e}")
-        return False
+#         if hashed_candidate == hashed_password:
+#             print("Password found!")
+#             print(f"Password: {candidate_str}")
+#             return True  # Password cracked successfully
+#         else:
+#             return False  # Password not cracked
+#     except Exception as e:
+#         print(f"Error hashing or cracking password: {e}")
+#         return False
 
 # # Define custom accumulator to store password found status
 # class PasswordFoundAccumulatorParam(AccumulatorParam):
@@ -47,7 +47,8 @@ sparkconf = SparkConf().setAppName("Password Cracker") \
                         .set("spark.driver.host", "145.220.74.141") \
                         .set("spark.driver.bindAddress", "10.0.0.4") \
                         .set("spark.driver.port","50243") \
-                        .set("spark.executor.memoryOverhead", "512m")  # Additional overhead for each executor
+                        .set("spark.executor.memoryOverhead", "512m") \
+                        .set("spark.shuffle.service.enabled", "true")  # Enable external shuffle service
 
 sparkcontext = SparkContext(conf=sparkconf)
 
@@ -118,7 +119,7 @@ def execute_task(chunk):
     print("Executing task at worker")
     try:
         for task in chunk:
-            if crack_password("sha1", hashed_password, task):
+            if user_script_module.crack_password("sha1", hashed_password, task):
                 print(f"password found: {task}")
                 return task
     except Exception as e:
