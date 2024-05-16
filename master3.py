@@ -214,9 +214,9 @@ async def main():
                                     #     break
                                     
                                     # Allocate the chunk to a worker
-                                    rdd = sparkcontext.parallelize(next(generating_chunks))
+                                    # rdd = sparkcontext.parallelize(next(generating_chunks))
                                     # Process chunks independently
-                                    password = rdd.map(lambda chunk: execute_task(chunk)).filter(lambda x: x is not None).collect()
+                                    password = sparkcontext.parallelize(next(generating_chunks)).map(lambda chunk: execute_task(chunk)).filter(lambda x: x is not None).collect()
                                     print(password)
                                     # Check if password is found
                                     print(f"Password: {password}")
