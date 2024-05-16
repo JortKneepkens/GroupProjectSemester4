@@ -218,32 +218,32 @@ async def main():
                                     # Allocate the chunk to a worker
                                     # rdd = sparkcontext.parallelize(next(generating_chunks))
                                     # Process chunks independently
-                                    # next_chunk = next(generating_chunks)
-                                    # password = sparkcontext.parallelize(next(generating_chunks)).map(execute_task).filter(lambda x: x is not None).collect()
-                                    # print(password)
-                                    # # Check if password is found
-                                    # print(f"Password: {password}")
-                                    # if password:
-                                    #     print("Password found:", password[0]) 
-                                    #     end_time = time.time()  # Record the end time
-                                    #     elapsed_time = end_time - start_time  # Calculate the elapsed time
-                                    #     print(f"Elapsed time: {elapsed_time} seconds")
-                                    #     break
+                                    next_chunk = next(generating_chunks)
+                                    password = sparkcontext.parallelize([next(generating_chunks)]).map(execute_task).filter(lambda x: x is not None).collect()
+                                    print(password)
+                                    # Check if password is found
+                                    print(f"Password: {password}")
+                                    if password:
+                                        print("Password found:", password[0]) 
+                                        end_time = time.time()  # Record the end time
+                                        elapsed_time = end_time - start_time  # Calculate the elapsed time
+                                        print(f"Elapsed time: {elapsed_time} seconds")
+                                        break
                                     
-                                    combinations_chunk, combinations_generator = generate_chunks(chunk_size, combinations_generator)
-                                    if combinations_chunk:
-                                        print(combinations_chunk)
-                                        password = sparkcontext.parallelize([combinations_chunk]).map(lambda chunk: execute_task(chunk)).filter(lambda x: x is not None).collect()
-                                        print(f"Password: {password}")
-                                        if password:
-                                            print("Password found:", password[0]) 
-                                            end_time = time.time()  # Record the end time
-                                            elapsed_time = end_time - start_time  # Calculate the elapsed time
-                                            print(f"Elapsed time: {elapsed_time} seconds")
-                                            break 
-                                    else:
-                                        print("No more combinations to try.")
-                                        break 
+                                    # combinations_chunk, combinations_generator = generate_chunks(chunk_size, combinations_generator)
+                                    # if combinations_chunk:
+                                    #     print(combinations_chunk)
+                                    #     password = sparkcontext.parallelize([combinations_chunk]).map(lambda chunk: execute_task(chunk)).filter(lambda x: x is not None).collect()
+                                    #     print(f"Password: {password}")
+                                    #     if password:
+                                    #         print("Password found:", password[0]) 
+                                    #         end_time = time.time()  # Record the end time
+                                    #         elapsed_time = end_time - start_time  # Calculate the elapsed time
+                                    #         print(f"Elapsed time: {elapsed_time} seconds")
+                                    #         break 
+                                    # else:
+                                    #     print("No more combinations to try.")
+                                    #     break
                             else:
                                 print("No user script module")
                     except json.JSONDecodeError as e:
