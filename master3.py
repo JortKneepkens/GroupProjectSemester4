@@ -170,7 +170,6 @@ def allocate_chunks(chunk_size):
                 print("Breaking because StopIteration")
                 break
         if chunk:
-            print(chunk)
             yield chunk
         else:
             print("Returning because there is no chunk")
@@ -234,6 +233,7 @@ async def main():
                                 generated_chunks = allocate_chunks(chunk_size)
                                 while True:
                                     next_chunk = next(generated_chunks)
+                                    print(next_chunk)
                                     if next_chunk:
                                         rdd = sparkcontext.parallelize(next_chunk)
                                         passwords = rdd.mapPartitions(process_chunks).collect()
