@@ -241,7 +241,7 @@ async def main():
                                 #     else:
                                 #         print("No more combinations to try.")
                                 #         break
-                                generated_chunks = generate_chunk(chunk_size)
+                                generated_chunks = allocate_chunks(chunk_size)
                                 while True:
                                     next_chunk = next(generated_chunks)
                                     print(f"Next chunk: {next_chunk}")
