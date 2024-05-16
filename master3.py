@@ -123,7 +123,7 @@ def execute_task(chunk):
                 return task
     except Exception as e:
         print(f"Error cracking password: {e}")
-        return None
+        return []
 
 def generate_combinations():
     print("Making combinations")
