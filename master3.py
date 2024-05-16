@@ -231,9 +231,8 @@ async def main():
                                 #     else:
                                 #         print("No more combinations to try.")
                                 #         break
-                                generating_chunks = allocate_chunks(chunk_size)
-                                rdd = sparkcontext.parallelize(generating_chunks)
-                                passwords = rdd.flatMap(process_chunks).collect()
+                                rdd = sparkcontext.parallelize(next(allocate_chunks(chunk_size)))
+                                passwords = rdd.mapPartitions(process_chunks).collect()
                                 if any(passwords):
                                     print("Password found:", [password for password in passwords if password])
                                     end_time = time.time()  # Record the end time
