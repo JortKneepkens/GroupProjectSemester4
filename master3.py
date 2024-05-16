@@ -211,14 +211,14 @@ async def main():
                                         break
                                     
                                     # Allocate the chunk to a worker
-                                    rdd = sparkcontext.parallelize(next_chunk)
+                                    results = sparkcontext.parallelize(next_chunk).flatMap(lambda chunk: execute_task(chunk)).collect()
                                     # Trigger RDD creation by performing an action
-                                    print("RDD created and parallelized")
+                                    print(results)
                                     # Process chunks independently
-                                    passwords = rdd.flatMap(lambda chunk: execute_task(chunk)).collect()
+                                    # passwords = rdd.flatMap(lambda chunk: execute_task(chunk)).collect()
                                     # Check if password is found
-                                    if any(passwords):
-                                        print("Password found:", [password for password in passwords if password])
+                                    if any(results):
+                                        print("Password found:", [password for password in results if password])
                                         break
                                     
                                     # combinations_chunk, combinations_generator = generate_chunks(chunk_size, combinations_generator)
