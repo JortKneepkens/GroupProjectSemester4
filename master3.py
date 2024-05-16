@@ -11,12 +11,13 @@ import cloudpickle
 
 import hashlib
 
-def crack_password(hash_algorithm, hashed_password, candidate):
+async def crack_password(hash_algorithm, hashed_password, candidate):
     try:
         # Hash the candidate password using the specified algorithm
         hashed_candidate = hashlib.new(hash_algorithm, candidate.encode()).hexdigest()
-        # Compare the hashed candidate with the provided hashed password
         if hashed_candidate == hashed_password:
+            print("Password found!")
+            print(f"Password: {candidate}")
             return True  # Password cracked successfully
         else:
             return False  # Password not cracked
@@ -105,14 +106,14 @@ async def load_user_script():
     except Exception as e:
         print(f"Error loading user script: {e}")
 
-def execute_task(chunk):
+async def execute_task(chunk):
     print("Executing task at worker")
     try:
         for task in chunk:
-            candidate = ''.join(task)
-            if crack_password("sha1", hashed_password, candidate):
-                print(f"password found: {candidate}")
-                return candidate
+            # candidate = ''.join(task)
+            if crack_password("sha1", hashed_password, task):
+                print(f"password found: {task}")
+                return task
     except Exception as e:
         print(f"Error cracking password: {e}")
         return None
@@ -128,7 +129,7 @@ def generate_chunks(chunk_size, combinations_generator):
     for _ in range(chunk_size):
         try:
             combination = next(combinations_generator)
-            chunk.append(combination)
+            chunk.append(''.join(combination))
         except StopIteration:
             break
     return chunk, combinations_generator
