@@ -125,6 +125,7 @@ def execute_task(chunk: list):
         return None
 
 def generate_combinations():
+    print("Making combinations")
     max_password_length = 6
     for length in range(1, max_password_length + 1):
         for combination in itertools.product(CHARACTER_SPACE, repeat=length):
@@ -143,18 +144,22 @@ def generate_combinations():
 # Dynamically allocate chunks to workers
 def allocate_chunks(chunk_size):
     combinations_generator = generate_combinations()
+    print("Allocate chunks")
     while True:
         chunk = []
+        print("Nieuwe chunk")
         for _ in range(chunk_size):
             try:
                 combination = next(combinations_generator)
                 chunk.append(combination)
             except StopIteration:
+                print("Breaking because StopIteration")
                 break
         if chunk:
             print(chunk)
             yield chunk
         else:
+            print("Returning because there is no chunk")
             return
 
 # Define the cleanup function
@@ -197,14 +202,20 @@ async def main():
                                 chunk_size = 10000
                                 combinations_generator = generate_combinations()
                                 while True:
-                                    # Allocate chunks to workers
-                                    rdd = sparkcontext.parallelize(next(allocate_chunks(chunk_size)))
+                                    # Get the next chunk
+                                    next_chunk = next(allocate_chunks(chunk_size), None)
+                                    
+                                    if next_chunk is None:
+                                        # No more chunks available, exit the loop
+                                        print("No chunk")
+                                        break
+                                    
+                                    # Allocate the chunk to a worker
+                                    rdd = sparkcontext.parallelize(next_chunk)
                                     # Trigger RDD creation by performing an action
-                                    rdd_count = rdd.count()
                                     print("RDD created and parallelized")
                                     # Process chunks independently
                                     passwords = rdd.flatMap(lambda chunk: execute_task(chunk)).collect()
-                                    print(passwords)
                                     # Check if password is found
                                     if any(passwords):
                                         print("Password found:", [password for password in passwords if password])
