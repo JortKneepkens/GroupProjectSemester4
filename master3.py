@@ -131,7 +131,9 @@ def generate_combinations():
     max_password_length = 6
     for length in range(1, max_password_length + 1):
         for combination in itertools.product(CHARACTER_SPACE, repeat=length):
-            yield ''.join(combination)
+            generated_combination = ''.join(combination)
+            print(generated_combination)
+            yield generated_combination
 
 def generate_chunks(chunk_size, combinations_generator):
     chunk = []
@@ -158,7 +160,6 @@ def allocate_chunks(chunk_size):
                 print("Breaking because StopIteration")
                 break
         if chunk:
-            print(chunk)
             yield chunk
         else:
             print("Returning because there is no chunk")
