@@ -231,15 +231,21 @@ async def main():
                                 #     else:
                                 #         print("No more combinations to try.")
                                 #         break
+                                generated_chunks = allocate_chunks(chunk_size)
                                 while True:
-                                    rdd = sparkcontext.parallelize(next(allocate_chunks(chunk_size)))
-                                    passwords = rdd.mapPartitions(process_chunks).collect()
-                                    if any(passwords):
-                                        print("Password found:", [password for password in passwords if password])
-                                        end_time = time.time()  # Record the end time
-                                        elapsed_time = end_time - start_time  # Calculate the elapsed time
-                                        print(f"Elapsed time: {elapsed_time} seconds")
-                                        break
+                                    next_chunk = next(generated_chunks)
+                                    if next_chunk:
+                                        rdd = sparkcontext.parallelize(next_chunk)
+                                        passwords = rdd.mapPartitions(process_chunks).collect()
+                                        if any(passwords):
+                                            print("Password found:", [password for password in passwords if password])
+                                            end_time = time.time()  # Record the end time
+                                            elapsed_time = end_time - start_time  # Calculate the elapsed time
+                                            print(f"Elapsed time: {elapsed_time} seconds")
+                                            break
+                                        else:
+                                            print("No more chunks")
+                                            break
                             else:
                                 print("No user script module")
                     except json.JSONDecodeError as e:
