@@ -19,6 +19,7 @@ def crack_password(hash_algorithm, hashed_password, candidate):
         # Hash the candidate password using the specified algorithm
         hashed_candidate = hashlib.new(hash_algorithm, candidate_str.encode()).hexdigest()
         print(f"Password: {candidate_str}, Hash: {hashed_candidate}")
+        print(f"Hashed password to crack: {hashed_password}")
         
         if hashed_candidate == hashed_password:
             print("Password found!")
