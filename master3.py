@@ -124,6 +124,18 @@ def execute_task(chunk):
     except Exception as e:
         print(f"Error cracking password: {e}")
         return []
+    
+# Process chunks independently
+def process_chunks(chunk):
+    passwords = []
+    for combination in chunk:
+        try:
+            password = execute_task(combination)
+            if password is not None:
+                passwords.append(password)
+        except Exception as e:
+            print(f"Error processing chunk: {e}")
+    return passwords
 
 def generate_combinations():
     print("Making combinations")
@@ -220,18 +232,14 @@ async def main():
                                 #         print("No more combinations to try.")
                                 #         break
                                 generating_chunks = allocate_chunks(chunk_size)
-                                while True:
-                                    next_chunk = next(generating_chunks, None)
-                                    if next_chunk is None:
-                                        break
-                                    # Process chunk independently
-                                    passwords = sparkcontext.parallelize([next_chunk]).flatMap(execute_task).collect()
-                                    if passwords:
-                                        print("Password found:", passwords)
-                                        break
-                                end_time = time.time()  # Record the end time
-                                elapsed_time = end_time - start_time  # Calculate the elapsed time
-                                print(f"Elapsed time: {elapsed_time} seconds")
+                                rdd = sparkcontext.parallelize(generating_chunks)
+                                passwords = rdd.flatMap(process_chunks).collect()
+                                if any(passwords):
+                                    print("Password found:", [password for password in passwords if password])
+                                    end_time = time.time()  # Record the end time
+                                    elapsed_time = end_time - start_time  # Calculate the elapsed time
+                                    print(f"Elapsed time: {elapsed_time} seconds")
+                                    break
                             else:
                                 print("No user script module")
                     except json.JSONDecodeError as e:
