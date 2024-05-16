@@ -8,6 +8,7 @@ import asyncio
 import json
 import importlib
 import cloudpickle
+import time
 
 import hashlib
 
@@ -199,6 +200,7 @@ async def main():
                             print("Received hashed password:", message_content)
                             hashed_password = message_content
                             if user_script_module is not None:
+                                start_time = time.time()  # Record the start time
                                 chunk_size = 10000
                                 combinations_generator = generate_combinations()
                                 generating_chunks = allocate_chunks(chunk_size)
@@ -220,6 +222,9 @@ async def main():
                                     # Check if password is found
                                     if any(passwords):
                                         print("Password found:", [password for password in passwords if password])
+                                        end_time = time.time()  # Record the end time
+                                        elapsed_time = end_time - start_time  # Calculate the elapsed time
+                                        print(f"Elapsed time: {elapsed_time} seconds")
                                         break
                                     
                                     # combinations_chunk, combinations_generator = generate_chunks(chunk_size, combinations_generator)
