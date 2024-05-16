@@ -201,6 +201,7 @@ async def main():
                             if user_script_module is not None:
                                 chunk_size = 10000
                                 combinations_generator = generate_combinations()
+                                generating_chunks = allocate_chunks(chunk_size)
                                 while True:
                                     # # Get the next chunk
                                     # next_chunk = next(allocate_chunks(chunk_size), None)
@@ -211,7 +212,7 @@ async def main():
                                     #     break
                                     
                                     # Allocate the chunk to a worker
-                                    rdd = sparkcontext.parallelize(next(allocate_chunks(chunk_size)))
+                                    rdd = sparkcontext.parallelize(next(generating_chunks))
                                     # Trigger RDD creation by performing an action
                                     print(rdd)
                                     # Process chunks independently
