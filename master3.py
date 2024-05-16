@@ -13,11 +13,16 @@ import hashlib
 
 def crack_password(hash_algorithm, hashed_password, candidate):
     try:
+        # Convert candidate to string before encoding
+        candidate_str = str(candidate)
+        
         # Hash the candidate password using the specified algorithm
-        hashed_candidate = hashlib.new(hash_algorithm, candidate.encode()).hexdigest()
+        hashed_candidate = hashlib.new(hash_algorithm, candidate_str.encode()).hexdigest()
+        print(f"Password: {candidate_str}, Hash: {hashed_candidate}")
+        
         if hashed_candidate == hashed_password:
             print("Password found!")
-            print(f"Password: {candidate}")
+            print(f"Password: {candidate_str}")
             return True  # Password cracked successfully
         else:
             return False  # Password not cracked
