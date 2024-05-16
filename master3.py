@@ -112,7 +112,7 @@ async def load_user_script():
     except Exception as e:
         print(f"Error loading user script: {e}")
 
-def execute_task(chunk):
+def execute_task(chunk: list):
     print("Executing task at worker")
     try:
         for task in chunk:
@@ -128,17 +128,34 @@ def generate_combinations():
     max_password_length = 6
     for length in range(1, max_password_length + 1):
         for combination in itertools.product(CHARACTER_SPACE, repeat=length):
-            yield combination
+            yield ''.join(combination)
 
-def generate_chunks(chunk_size, combinations_generator):
-    chunk = []
-    for _ in range(chunk_size):
-        try:
-            combination = next(combinations_generator)
-            chunk.append(''.join(combination))
-        except StopIteration:
+# def generate_chunks(chunk_size, combinations_generator):
+#     chunk = []
+#     for _ in range(chunk_size):
+#         try:
+#             combination = next(combinations_generator)
+#             chunk.append(combination)
+#         except StopIteration:
+#             break
+#     return chunk, combinations_generator
+
+# Dynamically allocate chunks to workers
+def allocate_chunks(chunk_size):
+    combinations_generator = generate_combinations()
+    while True:
+        chunk = []
+        for _ in range(chunk_size):
+            try:
+                combination = next(combinations_generator)
+                chunk.append(combination)
+            except StopIteration:
+                break
+        if chunk:
+            print(chunk)
+            yield chunk
+        else:
             break
-    return chunk, combinations_generator
 
 # Define the cleanup function
 def cleanup(local_filename):
@@ -180,17 +197,27 @@ async def main():
                                 chunk_size = 10000
                                 combinations_generator = generate_combinations()
                                 while True:
-                                    combinations_chunk, combinations_generator = generate_chunks(chunk_size, combinations_generator)
-                                    if combinations_chunk:
-                                        print(combinations_chunk)
-                                        password = sparkcontext.parallelize([combinations_chunk]).map(lambda chunk: execute_task(chunk)).filter(lambda x: x is not None).collect()
-                                        print(f"Password: {password}")
-                                        if password:
-                                            print("Password found:", password[0]) 
-                                            break 
-                                    else:
-                                        print("No more combinations to try.")
-                                        break 
+                                    # Allocate chunks to workers
+                                    rdd = sparkcontext.parallelize(allocate_chunks(chunk_size))
+                                    # Process chunks independently
+                                    passwords = rdd.flatMap(lambda chunk: execute_task(chunk)).collect()
+                                    
+                                    # Check if password is found
+                                    if any(passwords):
+                                        print("Password found:", [password for password in passwords if password])
+                                        break
+                                    
+                                    # combinations_chunk, combinations_generator = generate_chunks(chunk_size, combinations_generator)
+                                    # if combinations_chunk:
+                                    #     print(combinations_chunk)
+                                    #     password = sparkcontext.parallelize([combinations_chunk]).map(lambda chunk: execute_task(chunk)).filter(lambda x: x is not None).collect()
+                                    #     print(f"Password: {password}")
+                                    #     if password:
+                                    #         print("Password found:", password[0]) 
+                                    #         break 
+                                    # else:
+                                    #     print("No more combinations to try.")
+                                    #     break 
                             else:
                                 print("No user script module")
                     except json.JSONDecodeError as e:
