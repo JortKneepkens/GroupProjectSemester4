@@ -155,6 +155,17 @@ def generate_chunks(chunk_size, combinations_generator):
             break
     return chunk, combinations_generator
 
+def generate_chunk(chunk_size):
+    chunk = []
+    combinations_generator = generate_combinations()
+    for _ in range(chunk_size):
+        try:
+            combination = next(combinations_generator)
+            chunk.append(combination)
+        except StopIteration:
+            break
+    yield chunk
+
 # Dynamically allocate chunks to workers
 def allocate_chunks(chunk_size):
     combinations_generator = generate_combinations()
@@ -172,8 +183,8 @@ def allocate_chunks(chunk_size):
         if chunk:
             yield chunk
         else:
-            print("Returning because there is no chunk")
-            return
+            print("No more chunks")
+            break  # Break out of the loop when there are no more chunks
 
 # Define the cleanup function
 def cleanup(local_filename):
@@ -230,10 +241,10 @@ async def main():
                                 #     else:
                                 #         print("No more combinations to try.")
                                 #         break
-                                generated_chunks = allocate_chunks(chunk_size)
+                                generated_chunks = generate_chunk(chunk_size)
                                 while True:
                                     next_chunk = next(generated_chunks)
-                                    print(next_chunk)
+                                    print(f"Next chunk: {next_chunk}")
                                     if next_chunk:
                                         rdd = sparkcontext.parallelize(next_chunk)
                                         passwords = rdd.mapPartitions(process_chunks).collect()
