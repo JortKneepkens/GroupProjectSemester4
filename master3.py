@@ -210,28 +210,28 @@ async def main():
                                     #     print("No chunk")
                                     #     break
                                     
-                                    # # Allocate the chunk to a worker
-                                    # results = sparkcontext.parallelize(next_chunk).flatMap(lambda chunk: execute_task(chunk)).collect()
-                                    # # Trigger RDD creation by performing an action
-                                    # print(results)
-                                    # # Process chunks independently
-                                    # # passwords = rdd.flatMap(lambda chunk: execute_task(chunk)).collect()
-                                    # # Check if password is found
-                                    # if any(results):
-                                    #     print("Password found:", [password for password in results if password])
-                                    #     break
+                                    # Allocate the chunk to a worker
+                                    rdd = sparkcontext.parallelize(next(allocate_chunks(chunk_size)))
+                                    # Trigger RDD creation by performing an action
+                                    print(rdd)
+                                    # Process chunks independently
+                                    passwords = rdd.map(lambda chunk: execute_task(chunk)).collect()
+                                    # Check if password is found
+                                    if any(passwords):
+                                        print("Password found:", [password for password in passwords if password])
+                                        break
                                     
-                                    combinations_chunk, combinations_generator = generate_chunks(chunk_size, combinations_generator)
-                                    if combinations_chunk:
-                                        print(combinations_chunk)
-                                        password = sparkcontext.parallelize(combinations_chunk).map(lambda chunk: execute_task(chunk)).filter(lambda x: x is not None).collect()
-                                        print(f"Password: {password}")
-                                        if password:
-                                            print("Password found:", password[0]) 
-                                            break 
-                                    else:
-                                        print("No more combinations to try.")
-                                        break 
+                                    # combinations_chunk, combinations_generator = generate_chunks(chunk_size, combinations_generator)
+                                    # if combinations_chunk:
+                                    #     print(combinations_chunk)
+                                    #     password = sparkcontext.parallelize(combinations_chunk).map(lambda chunk: execute_task(chunk)).filter(lambda x: x is not None).collect()
+                                    #     print(f"Password: {password}")
+                                    #     if password:
+                                    #         print("Password found:", password[0]) 
+                                    #         break 
+                                    # else:
+                                    #     print("No more combinations to try.")
+                                    #     break 
                             else:
                                 print("No user script module")
                     except json.JSONDecodeError as e:
