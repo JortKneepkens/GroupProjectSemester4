@@ -15,13 +15,13 @@ import hashlib
 def crack_password(hash_algorithm, hashed_password, candidate):
     try:
         # Convert candidate to string before encoding
-        print(f"Candidate: {candidate}")
         candidate_str = str(candidate)
         
         # Hash the candidate password using the specified algorithm
         hashed_candidate = hashlib.new(hash_algorithm, candidate_str.encode()).hexdigest()
-        print(f"Password: {candidate_str}, Hash: {hashed_candidate}")
-        print(f"Hashed password to crack: {hashed_password}")
+        if(candidate == "abc1"):
+            print(f"Password: {candidate_str}, Hash: {hashed_candidate}")
+            print(f"Hashed password to crack: {hashed_password}")
         
         if hashed_candidate == hashed_password:
             print("Password found!")
@@ -118,7 +118,6 @@ def execute_task(chunk):
     print("Executing task at worker")
     try:
         for task in chunk:
-            print(f"Task: {task}")
             if crack_password("sha1", hashed_password, task):
                 print(f"password found: {task}")
                 return task
