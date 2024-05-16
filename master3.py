@@ -155,7 +155,7 @@ def allocate_chunks(chunk_size):
             print(chunk)
             yield chunk
         else:
-            break
+            return
 
 # Define the cleanup function
 def cleanup(local_filename):
@@ -199,9 +199,11 @@ async def main():
                                 while True:
                                     # Allocate chunks to workers
                                     rdd = sparkcontext.parallelize(allocate_chunks(chunk_size))
+                                    print(rdd)
+                                    print("parallelized")
                                     # Process chunks independently
                                     passwords = rdd.flatMap(lambda chunk: execute_task(chunk)).collect()
-                                    
+                                    print(passwords)
                                     # Check if password is found
                                     if any(passwords):
                                         print("Password found:", [password for password in passwords if password])
