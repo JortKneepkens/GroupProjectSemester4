@@ -114,7 +114,7 @@ async def load_user_script():
     except Exception as e:
         print(f"Error loading user script: {e}")
 
-def execute_task(chunk: list):
+def execute_task(chunk):
     print("Executing task at worker")
     try:
         for task in chunk:
@@ -218,7 +218,8 @@ async def main():
                                     # Allocate the chunk to a worker
                                     # rdd = sparkcontext.parallelize(next(generating_chunks))
                                     # Process chunks independently
-                                    password = sparkcontext.parallelize(next(generating_chunks)).map(lambda chunk: execute_task(chunk)).filter(lambda x: x is not None).collect()
+                                    next_chunk = next(generating_chunks)
+                                    password = sparkcontext.parallelize(next(generating_chunks)).map(execute_task).filter(lambda x: x is not None).collect()
                                     print(password)
                                     # Check if password is found
                                     print(f"Password: {password}")
