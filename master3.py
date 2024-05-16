@@ -14,7 +14,7 @@ import hashlib
 async def crack_password(hash_algorithm, hashed_password, candidate):
     try:
         # Hash the candidate password using the specified algorithm
-        hashed_candidate = hashlib.new(hash_algorithm, candidate.encode()).hexdigest()
+        hashed_candidate = await hashlib.new(hash_algorithm, candidate.encode()).hexdigest()
         if hashed_candidate == hashed_password:
             print("Password found!")
             print(f"Password: {candidate}")
@@ -111,7 +111,7 @@ async def execute_task(chunk):
     try:
         for task in chunk:
             # candidate = ''.join(task)
-            if crack_password("sha1", hashed_password, task):
+            if await crack_password("sha1", hashed_password, task):
                 print(f"password found: {task}")
                 return task
     except Exception as e:
