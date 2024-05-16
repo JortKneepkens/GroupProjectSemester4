@@ -198,7 +198,7 @@ async def main():
                                 combinations_generator = generate_combinations()
                                 while True:
                                     # Allocate chunks to workers
-                                    rdd = sparkcontext.parallelize(allocate_chunks(chunk_size))
+                                    rdd = sparkcontext.parallelize(next(allocate_chunks(chunk_size)))
                                     # Trigger RDD creation by performing an action
                                     rdd_count = rdd.count()
                                     print("RDD created and parallelized")
