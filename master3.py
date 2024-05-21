@@ -227,38 +227,38 @@ async def main():
                             if user_script_module is not None:
                                 start_time = time.time()  # Record the start time
                                 chunk_size = 10000
-                                # combinations_generator = generate_combinations()
-                                # while True:
-                                #     combinations_chunk, combinations_generator = generate_chunks(chunk_size, combinations_generator)
-                                #     if combinations_chunk:
-                                #         print(combinations_chunk)
-                                #         password = sparkcontext.parallelize([combinations_chunk]).map(lambda chunk: execute_task(chunk)).filter(lambda x: x is not None).collect()
-                                #         print(f"Password: {password}")
-                                #         if password:
-                                #             print("Password found:", password[0]) 
-                                #             end_time = time.time()  # Record the end time
-                                #             elapsed_time = end_time - start_time  # Calculate the elapsed time
-                                #             print(f"Elapsed time: {elapsed_time} seconds")
-                                #             break 
-                                #     else:
-                                #         print("No more combinations to try.")
-                                #         break
-                                generated_chunks = allocate_chunks(chunk_size)
+                                combinations_generator = generate_combinations()
                                 while True:
-                                    next_chunk = next(generated_chunks)
-                                    print(f"Next chunk: {next_chunk}")
-                                    if next_chunk:
-                                        rdd = sparkcontext.parallelize([next_chunk])
-                                        passwords = rdd.flatMap(process_chunks).collect()
-                                        if any(passwords):
-                                            print("Password found:", [password for password in passwords if password])
+                                    combinations_chunk, combinations_generator = generate_chunks(chunk_size, combinations_generator)
+                                    if combinations_chunk:
+                                        print(combinations_chunk)
+                                        password = sparkcontext.parallelize([combinations_chunk]).map(lambda chunk: execute_task(chunk)).filter(lambda x: x is not None).collect()
+                                        print(f"Password: {password}")
+                                        if password:
+                                            print("Password found:", password[0]) 
                                             end_time = time.time()  # Record the end time
                                             elapsed_time = end_time - start_time  # Calculate the elapsed time
                                             print(f"Elapsed time: {elapsed_time} seconds")
-                                            break
+                                            break 
                                     else:
-                                        print("No more chunks")
+                                        print("No more combinations to try.")
                                         break
+                                # generated_chunks = allocate_chunks(chunk_size)
+                                # while True:
+                                #     next_chunk = next(generated_chunks)
+                                #     print(f"Next chunk: {next_chunk}")
+                                #     if next_chunk:
+                                #         rdd = sparkcontext.parallelize([next_chunk])
+                                #         passwords = rdd.mapPartitions(process_chunks).collect()
+                                #         if any(passwords):
+                                #             print("Password found:", [password for password in passwords if password])
+                                #             end_time = time.time()  # Record the end time
+                                #             elapsed_time = end_time - start_time  # Calculate the elapsed time
+                                #             print(f"Elapsed time: {elapsed_time} seconds")
+                                #             break
+                                #     else:
+                                #         print("No more chunks")
+                                #         break
                             else:
                                 print("No user script module")
                     except json.JSONDecodeError as e:
