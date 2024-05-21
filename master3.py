@@ -226,7 +226,7 @@ async def main():
                             hashed_password = message_content
                             if user_script_module is not None:
                                 start_time = time.time()  # Record the start time
-                                chunk_size = 30000
+                                chunk_size = 50000
                                 # combinations_generator = generate_combinations()
                                 # while True:
                                 #     combinations_chunk, combinations_generator = generate_chunks(chunk_size, combinations_generator)
