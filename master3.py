@@ -115,6 +115,9 @@ async def load_user_script():
         print(f"Error loading user script: {e}")
 
 def execute_task(chunk):
+    print("Executing task at worker")
+    print("Chunk:")
+    print(chunk)
     try:
         for task in chunk:
             if user_script_module.crack_password("sha1", hashed_password, task):
@@ -245,12 +248,8 @@ async def main():
                                     next_chunk = next(generated_chunks)
                                     print(f"Next chunk: {next_chunk}")
                                     if next_chunk:
-                                        # rdd = sparkcontext.parallelize([next_chunk], 10)
-                                        # passwords = rdd.map(process_chunks).collect()
-                                        passwords_rdd = sparkcontext.parallelize(generated_chunks, numSlices=10).mapPartitions(process_chunks)
-
-                                        # Collect and print results
-                                        passwords = passwords_rdd.collect()
+                                        rdd = sparkcontext.parallelize([next_chunk])
+                                        passwords = rdd.mapPartitions(process_chunks).collect()
                                         if any(passwords):
                                             print("Password found:", [password for password in passwords if password])
                                             end_time = time.time()  # Record the end time
