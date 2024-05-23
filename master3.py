@@ -115,9 +115,6 @@ async def load_user_script():
         print(f"Error loading user script: {e}")
 
 def execute_task(chunk):
-    print("Executing task at worker")
-    print("Chunk:")
-    print(chunk)
     try:
         for task in chunk:
             if user_script_module.crack_password("sha1", hashed_password, task):
