@@ -127,12 +127,12 @@ def execute_task(chunk):
         print(f"Error cracking password: {e}")
         return []
     
-# Process chunks asynchronously
-async def process_chunks_async(chunk):
+# Process chunks independently
+def process_chunks(chunk):
     passwords = []
     for combination in chunk:
         try:
-            password = await asyncio.to_thread(execute_task, combination)
+            password = execute_task(combination)
             if password is not None:
                 passwords.append(password)
         except Exception as e:
@@ -249,7 +249,7 @@ async def main():
                                     print(f"Next chunk: {next_chunk}")
                                     if next_chunk:
                                         rdd = sparkcontext.parallelize([next_chunk], numSlices=10)
-                                        passwords = rdd.mapPartitions(process_chunks_async).collect()
+                                        passwords = rdd.mapPartitions(process_chunks).collect()
                                         if any(passwords):
                                             print("Password found:", [password for password in passwords if password])
                                             end_time = time.time()  # Record the end time
