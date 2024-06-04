@@ -83,18 +83,32 @@ async def load_user_script():
     except Exception as e:
         print(f"Error loading user script: {e}")
 
+# def execute_task(chunk):
+#     print("Executing task at worker")
+#     print("Chunk:")
+#     print(chunk)
+#     try:
+#         for task in chunk:
+#             if user_script_module.crack_password("sha1", hashed_password, task):
+#                 print(f"password found: {task}")
+#                 return task
+#     except Exception as e:
+#         print(f"Error cracking password: {e}")
+#         return []
 def execute_task(chunk):
     print("Executing task at worker")
     print("Chunk:")
     print(chunk)
+    results = []  # Initialize an empty list to store results
     try:
         for task in chunk:
             if user_script_module.crack_password("sha1", hashed_password, task):
                 print(f"password found: {task}")
-                return task
+                results.append(task)
+                break  # If a password is found, break the loop
     except Exception as e:
         print(f"Error cracking password: {e}")
-        return []
+    return results  # Always return a list
     
 # Process chunks independently
 def process_chunks(chunk):
@@ -218,7 +232,6 @@ async def main():
                                     print(f"Next chunk: {next_chunk}")
                                     if next_chunk:
                                         rdd = sparkcontext.parallelize(next_chunk, numSlices=6)
-                                        _ = rdd.unpersist()
                                         passwords = rdd.mapPartitions(execute_task).collect()
                                         # passwords = sparkcontext.parallelize(next_chunk).mapPartitions(execute_task).collect()
                                         print("passwords: ")
