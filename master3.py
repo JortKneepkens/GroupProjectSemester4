@@ -218,7 +218,6 @@ async def main():
                                     print(f"Next chunk: {next_chunk}")
                                     if next_chunk:
                                         rdd = sparkcontext.parallelize(next_chunk, numSlices=6)
-                                        _ = rdd.unpersist()
                                         passwords = rdd.mapPartitions(execute_task).collect()
                                         # passwords = sparkcontext.parallelize(next_chunk).mapPartitions(process_chunks).collect()
                                         print("passwords: ")
