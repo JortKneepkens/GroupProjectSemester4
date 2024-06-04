@@ -113,8 +113,8 @@ def generate_combinations():
     max_password_length = 6
     for length in range(1, max_password_length + 1):
         for combination in itertools.product(CHARACTER_SPACE, repeat=length):
-            # generated_combination = ''.join(combination)
-            yield combination
+            generated_combination = ''.join(combination)
+            yield generated_combination
 
 # def generate_chunks(chunk_size, combinations_generator):
 #     chunk = []
