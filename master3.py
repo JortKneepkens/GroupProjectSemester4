@@ -217,9 +217,9 @@ async def main():
                                     next_chunk = next(generated_chunks)
                                     print(f"Next chunk: {next_chunk}")
                                     if next_chunk:
-                                        # rdd = sparkcontext.parallelize(next_chunk, numSlices=6)
-                                        # passwords = rdd.mapPartitions(execute_task).collect()
-                                        passwords = sparkcontext.parallelize(next_chunk).mapPartitions(execute_task).collect()
+                                        # rdd = sparkcontext.parallelize([next_chunk], numSlices=3)
+                                        # passwords = rdd.mapPartitions(process_chunks).collect()
+                                        passwords = sparkcontext.parallelize(next_chunk).mapPartitions(process_chunks).collect()
                                         print("passwords: ")
                                         print(passwords)
                                         if any(passwords):
