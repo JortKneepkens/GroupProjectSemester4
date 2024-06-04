@@ -220,7 +220,8 @@ async def main():
                                         # rdd = sparkcontext.parallelize([next_chunk], numSlices=3)
                                         # passwords = rdd.mapPartitions(process_chunks).collect()
                                         passwords = sparkcontext.parallelize(next_chunk).mapPartitions(process_chunks).collect()
-                                        print("Passwords: " + passwords)
+                                        print("passwords: ")
+                                        print(passwords)
                                         if any(passwords):
                                             print("Password found:", [password for password in passwords if password])
                                             end_time = time.time()  # Record the end time
