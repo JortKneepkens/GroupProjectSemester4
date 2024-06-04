@@ -219,7 +219,7 @@ async def main():
                                     if next_chunk:
                                         # rdd = sparkcontext.parallelize([next_chunk], numSlices=3)
                                         # passwords = rdd.mapPartitions(process_chunks).collect()
-                                        passwords = sparkcontext.parallelize(next_chunk).mapPartitions(process_chunks)
+                                        passwords = sparkcontext.parallelize(next_chunk).mapPartitions(process_chunks).collect()
                                         print("Passwords: " + passwords)
                                         if any(passwords):
                                             print("Password found:", [password for password in passwords if password])
