@@ -113,29 +113,29 @@ def generate_combinations():
     max_password_length = 6
     for length in range(1, max_password_length + 1):
         for combination in itertools.product(CHARACTER_SPACE, repeat=length):
-            generated_combination = ''.join(combination)
-            yield generated_combination
+            # generated_combination = ''.join(combination)
+            yield combination
 
-def generate_chunks(chunk_size, combinations_generator):
-    chunk = []
-    for _ in range(chunk_size):
-        try:
-            combination = next(combinations_generator)
-            chunk.append(combination)
-        except StopIteration:
-            break
-    return chunk, combinations_generator
+# def generate_chunks(chunk_size, combinations_generator):
+#     chunk = []
+#     for _ in range(chunk_size):
+#         try:
+#             combination = next(combinations_generator)
+#             chunk.append(combination)
+#         except StopIteration:
+#             break
+#     return chunk, combinations_generator
 
-def generate_chunk(chunk_size):
-    chunk = []
-    combinations_generator = generate_combinations()
-    for _ in range(chunk_size):
-        try:
-            combination = next(combinations_generator)
-            chunk.append(combination)
-        except StopIteration:
-            break
-    yield chunk
+# def generate_chunk(chunk_size):
+#     chunk = []
+#     combinations_generator = generate_combinations()
+#     for _ in range(chunk_size):
+#         try:
+#             combination = next(combinations_generator)
+#             chunk.append(combination)
+#         except StopIteration:
+#             break
+#     yield chunk
 
 # Dynamically allocate chunks to workers
 def allocate_chunks(chunk_size):
@@ -219,7 +219,8 @@ async def main():
                                     if next_chunk:
                                         # rdd = sparkcontext.parallelize([next_chunk], numSlices=3)
                                         # passwords = rdd.mapPartitions(process_chunks).collect()
-                                        passwords = sparkcontext.parallelize([next_chunk]).map(process_chunks).collect()[0]
+                                        passwords = sparkcontext.parallelize(next_chunk).mapPartitions(process_chunks)
+                                        print("Passwords: " + passwords)
                                         if any(passwords):
                                             print("Password found:", [password for password in passwords if password])
                                             end_time = time.time()  # Record the end time
