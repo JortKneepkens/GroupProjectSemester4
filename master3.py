@@ -10,37 +10,6 @@ import importlib
 import cloudpickle
 import time
 
-import hashlib
-
-# def crack_password(hash_algorithm, hashed_password, candidate):
-#     try:
-#         # Convert candidate to string before encoding
-#         candidate_str = str(candidate)
-        
-#         # Hash the candidate password using the specified algorithm
-#         hashed_candidate = hashlib.new(hash_algorithm, candidate_str.encode()).hexdigest()
-#         if(candidate == "abc1"):
-#             print(f"Password: {candidate_str}, Hash: {hashed_candidate}")
-#             print(f"Hashed password to crack: {hashed_password}")
-        
-#         if hashed_candidate == hashed_password:
-#             print("Password found!")
-#             print(f"Password: {candidate_str}")
-#             return True  # Password cracked successfully
-#         else:
-#             return False  # Password not cracked
-#     except Exception as e:
-#         print(f"Error hashing or cracking password: {e}")
-#         return False
-
-# # Define custom accumulator to store password found status
-# class PasswordFoundAccumulatorParam(AccumulatorParam):
-#     def zero(self, initialValue):
-#         return initialValue
-
-#     def addInPlace(self, v1, v2):
-#         return v1 or v2
-
 # Initialize Spark session
 sparkconf = SparkConf().setAppName("Password Cracker") \
                         .setMaster("spark://10.0.0.4:7077") \
@@ -248,7 +217,7 @@ async def main():
                                     next_chunk = next(generated_chunks)
                                     print(f"Next chunk: {next_chunk}")
                                     if next_chunk:
-                                        rdd = sparkcontext.parallelize([next_chunk], numSlices=10)
+                                        rdd = sparkcontext.parallelize([next_chunk], numSlices=3)
                                         passwords = rdd.mapPartitions(process_chunks).collect()
                                         if any(passwords):
                                             print("Password found:", [password for password in passwords if password])
