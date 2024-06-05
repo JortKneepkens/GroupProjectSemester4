@@ -188,6 +188,7 @@ async def main():
     global hashed_password
     global user_script_module
     global user_script_filename
+    tried_passwords_count = 0
     print(f"Connecting to {websocket_uri}...")
     while True: 
         try:
@@ -236,11 +237,23 @@ async def main():
                                         # passwords = sparkcontext.parallelize(next_chunk).mapPartitions(execute_task).collect()
                                         print("passwords: ")
                                         print(passwords)
+                                        tried_passwords_count += len(next_chunk) 
+                                        elapsed_time = time.time() - start_time
+                                        await websocket.send(json.dumps({
+                                            "Type": "Status_Update",
+                                            "Tried_Passwords": tried_passwords_count,
+                                            "Elapsed_Time": elapsed_time
+                                        }))
                                         if any(passwords):
                                             print("Password found:", [password for password in passwords if password])
                                             end_time = time.time()  # Record the end time
                                             elapsed_time = end_time - start_time  # Calculate the elapsed time
                                             print(f"Elapsed time: {elapsed_time} seconds")
+                                            message = {
+                                                "Type": "Password_Found",
+                                                "Content": passwords[0]
+                                            }
+                                            await websocket.send(json.dumps(message))
                                             break
                                     else:
                                         print("No more chunks")
