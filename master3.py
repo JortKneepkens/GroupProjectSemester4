@@ -16,7 +16,13 @@ sparkconf = SparkConf().setAppName("Password Cracker") \
                         .set("spark.driver.host", "145.220.74.141") \
                         .set("spark.driver.bindAddress", "10.0.0.4") \
                         .set("spark.driver.port","50243") \
-                        .set("spark.executor.memoryOverhead", "512m")
+                        .set("spark.executor.memoryOverhead", "512m") \
+                        .set("spark.shuffle.compress", "false") \
+                        .set("spark.shuffle.spill.compress", "false") \
+                        .set("spark.broadcast.compress", "false") \
+                        .set("spark.network.timeout", "800s") \
+                        .set("spark.executor.heartbeatInterval", "60s") \
+                        .set("spark.rpc.message.maxSize", "512")
 
 sparkcontext = SparkContext(conf=sparkconf)
 
