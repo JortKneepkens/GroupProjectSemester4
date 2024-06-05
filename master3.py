@@ -210,7 +210,7 @@ async def main():
                             hashed_password = message_content
                             if user_script_module is not None:
                                 start_time = time.time()  # Record the start time
-                                chunk_size = 500000
+                                chunk_size = 750000
                                 # combinations_generator = generate_combinations()
                                 # while True:
                                 #     combinations_chunk, combinations_generator = generate_chunks(chunk_size, combinations_generator)
@@ -232,7 +232,8 @@ async def main():
                                     next_chunk = next(generated_chunks)
                                     print(f"Next chunk: {next_chunk}")
                                     if next_chunk:
-                                        rdd = sparkcontext.parallelize(next_chunk, numSlices=6)
+                                        rdd = sparkcontext.parallelize(next_chunk)
+                                        _ = rdd.unpersist()
                                         passwords = rdd.mapPartitions(execute_task).collect()
                                         # passwords = sparkcontext.parallelize(next_chunk).mapPartitions(execute_task).collect()
                                         print("passwords: ")
