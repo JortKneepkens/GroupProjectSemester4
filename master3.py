@@ -18,15 +18,14 @@ sparkconf = SparkConf().setAppName("Password Cracker") \
                         .set("spark.driver.port","50243") \
                         .set("spark.shuffle.compress", "false") \
                         .set("spark.shuffle.spill.compress", "false") \
-                        .set("spark.broadcast.compress", "true") \
+                        .set("spark.broadcast.compress", "false") \
                         .set("spark.network.timeout", "800s") \
                         .set("spark.executor.heartbeatInterval", "60s") \
                         .set("spark.dynamicAllocation.enabled", "false") \
                         .set("spark.speculation", "true") \
                         .set("spark.speculation.quantile", "0.75") \
                         .set("spark.speculation.multiplier", "1.5") \
-                        .set("spark.shuffle.service.enabled", "false") \
-                        .set("spark.shuffle.io.numConnectionsPerPeer", "0")
+                        .set("spark.shuffle.service.enabled", "false")
                         # .set("spark.rpc.message.maxSize", "512") \
 
 sparkcontext = SparkContext(conf=sparkconf)
