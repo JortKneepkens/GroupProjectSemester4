@@ -22,7 +22,10 @@ sparkconf = SparkConf().setAppName("Password Cracker") \
                         .set("spark.broadcast.compress", "false") \
                         .set("spark.network.timeout", "800s") \
                         .set("spark.executor.heartbeatInterval", "60s") \
-                        .set("spark.rpc.message.maxSize", "512")
+                        .set("spark.dynamicAllocation.enabled", "false") \
+                        .set("spark.rpc.message.maxSize", "512") \
+                        .set("spark.task.cpus", "1") \
+                        .set("spark.speculation", "true") \
 
 sparkcontext = SparkContext(conf=sparkconf)
 
@@ -203,6 +206,7 @@ async def main():
                 async for message in websocket:
                     try:
                         parsed_message = json.loads(message)
+                        token = parsed_message.get("WsToken")
                         message_type = parsed_message.get("Type")
                         message_content = parsed_message.get("Content")
                         if message_type == "File_Uploaded":
@@ -239,6 +243,7 @@ async def main():
                                     print(f"Next chunk: {next_chunk}")
                                     if next_chunk:
                                         rdd = sparkcontext.parallelize(next_chunk)
+                                        rdd = rdd.repartition(sparkcontext.defaultParallelism)
                                         _ = rdd.unpersist()
                                         passwords = rdd.mapPartitions(execute_task).collect()
                                         # passwords = sparkcontext.parallelize(next_chunk).mapPartitions(execute_task).collect()
@@ -247,6 +252,7 @@ async def main():
                                         tried_passwords_count += len(next_chunk) 
                                         elapsed_time = time.time() - start_time
                                         await websocket.send(json.dumps({
+                                            "WsToken": token,
                                             "Type": "Status_Update",
                                             "Tried_Passwords": tried_passwords_count,
                                             "Elapsed_Time": elapsed_time
@@ -257,6 +263,7 @@ async def main():
                                             elapsed_time = end_time - start_time  # Calculate the elapsed time
                                             print(f"Elapsed time: {elapsed_time} seconds")
                                             message = {
+                                                "WsToken": token,
                                                 "Type": "Password_Found",
                                                 "Content": passwords[0]
                                             }
