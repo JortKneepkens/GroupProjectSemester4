@@ -18,13 +18,15 @@ sparkconf = SparkConf().setAppName("Password Cracker") \
                         .set("spark.driver.port","50243") \
                         .set("spark.shuffle.compress", "false") \
                         .set("spark.shuffle.spill.compress", "false") \
-                        .set("spark.broadcast.compress", "false") \
+                        .set("spark.broadcast.compress", "true") \
                         .set("spark.network.timeout", "800s") \
                         .set("spark.executor.heartbeatInterval", "60s") \
                         .set("spark.dynamicAllocation.enabled", "false") \
                         .set("spark.speculation", "true") \
                         .set("spark.speculation.quantile", "0.75") \
-                        .set("spark.speculation.multiplier", "1.5")
+                        .set("spark.speculation.multiplier", "1.5") \
+                        .set("spark.shuffle.service.enabled", "false") \
+                        .set("spark.shuffle.io.numConnectionsPerPeer", "0")
                         # .set("spark.rpc.message.maxSize", "512") \
 
 sparkcontext = SparkContext(conf=sparkconf)
@@ -261,7 +263,7 @@ async def main():
                                         tried_passwords_count += len(next_chunk) 
                                         elapsed_time = time.time() - start_time
                                         await websocket.send(json.dumps({
-                                            "WsToken": token,
+                                            # "WsToken": token,
                                             "Type": "Status_Update",
                                             "Tried_Passwords": tried_passwords_count,
                                             "Elapsed_Time": elapsed_time
@@ -272,7 +274,7 @@ async def main():
                                             elapsed_time = end_time - start_time  # Calculate the elapsed time
                                             print(f"Elapsed time: {elapsed_time} seconds")
                                             message = {
-                                                "WsToken": token,
+                                                # "WsToken": token,
                                                 "Type": "Password_Found",
                                                 "Content": passwords[0]
                                             }
