@@ -23,9 +23,8 @@ sparkconf = SparkConf().setAppName("Password Cracker") \
                         .set("spark.network.timeout", "800s") \
                         .set("spark.executor.heartbeatInterval", "60s") \
                         .set("spark.dynamicAllocation.enabled", "false") \
-                        .set("spark.rpc.message.maxSize", "512") \
-                        .set("spark.task.cpus", "1") \
                         .set("spark.speculation", "true")
+                        # .set("spark.rpc.message.maxSize", "512") \
 
 sparkcontext = SparkContext(conf=sparkconf)
 
