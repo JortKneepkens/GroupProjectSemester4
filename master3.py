@@ -133,13 +133,13 @@ def process_chunks(chunk):
             print(f"Error processing chunk: {e}")
     return passwords
 
-# def generate_combinations():
-#     print("Making combinations")
-#     max_password_length = 6
-#     for length in range(1, max_password_length + 1):
-#         for combination in itertools.product(CHARACTER_SPACE, repeat=length):
-#             generated_combination = ''.join(combination)
-#             yield str(generated_combination)
+def generate_combinations():
+    print("Making combinations")
+    max_password_length = 6
+    for length in range(1, max_password_length + 1):
+        for combination in itertools.product(CHARACTER_SPACE, repeat=length):
+            generated_combination = ''.join(combination)
+            yield str(generated_combination)
 
 # def generate_combinations():
 #     print("Generating combinations...")
