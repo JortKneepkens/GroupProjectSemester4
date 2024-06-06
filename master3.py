@@ -21,9 +21,7 @@ sparkconf = SparkConf().setAppName("Password Cracker") \
                         .set("spark.broadcast.compress", "false") \
                         .set("spark.network.timeout", "800s") \
                         .set("spark.executor.heartbeatInterval", "60s") \
-                        .set("spark.dynamicAllocation.enabled", "true") \
-                        .set("spark.dynamicAllocation.minExecutors", "2") \
-                        .set("spark.dynamicAllocation.maxExecutors", "10") \
+                        .set("spark.dynamicAllocation.enabled", "false") \
                         .set("spark.speculation", "true") \
                         .set("spark.speculation.quantile", "0.75") \
                         .set("spark.speculation.multiplier", "1.5")
