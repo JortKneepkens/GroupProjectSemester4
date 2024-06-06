@@ -252,11 +252,11 @@ async def main():
                                 generated_chunks = allocate_chunks(chunk_size)
                                 while True:
                                     next_chunk = next(generated_chunks)
-                                    print(f"Next chunk: {next_chunk}")
                                     if next_chunk:
                                         rdd = sparkcontext.parallelize(next_chunk)
                                         _ = rdd.unpersist()
                                         passwords = rdd.mapPartitions(execute_task).collect()
+                                        print(rdd.cache())
                                         # passwords = sparkcontext.parallelize(next_chunk).mapPartitions(execute_task).collect()
                                         print("passwords: ")
                                         print(passwords)
