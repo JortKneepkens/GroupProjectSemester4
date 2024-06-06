@@ -13,7 +13,7 @@ import time
 # Initialize Spark session
 sparkconf = SparkConf().setAppName("Password Cracker") \
                         .setMaster("spark://10.0.0.4:7077") \
-                        .set("spark.driver.host", "145.220.74.141") \
+                        .set("spark.driver.host", "10.0.0.4") \
                         .set("spark.driver.bindAddress", "10.0.0.4") \
                         .set("spark.driver.port","50243") \
                         .set("spark.shuffle.compress", "false") \
@@ -25,7 +25,15 @@ sparkconf = SparkConf().setAppName("Password Cracker") \
                         .set("spark.speculation", "true") \
                         .set("spark.speculation.quantile", "0.75") \
                         .set("spark.speculation.multiplier", "1.5") \
-                        .set("spark.shuffle.service.enabled", "false")
+                        .set("spark.shuffle.service.enabled", "false") \
+                        .set("spark.blockManager.port", "10020") \
+                        .set("spark.executor.port", "10021") \
+                        .set("spark.executor.port.maxRetries", "20") \
+                        .set("spark.broadcast.port", "10022") \
+                        .set("spark.fileserver.port", "10023") \
+                        .set("spark.replClassServer.port", "10024") \
+                        .set("spark.port.maxRetries", "50")
+                        # .set("spark.driver.host", "145.220.74.141") \
                         # .set("spark.rpc.message.maxSize", "512") \
 
 sparkcontext = SparkContext(conf=sparkconf)
