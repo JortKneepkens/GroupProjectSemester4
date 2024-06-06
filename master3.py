@@ -16,14 +16,17 @@ sparkconf = SparkConf().setAppName("Password Cracker") \
                         .set("spark.driver.host", "145.220.74.141") \
                         .set("spark.driver.bindAddress", "10.0.0.4") \
                         .set("spark.driver.port","50243") \
-                        .set("spark.executor.memoryOverhead", "512m") \
                         .set("spark.shuffle.compress", "false") \
                         .set("spark.shuffle.spill.compress", "false") \
                         .set("spark.broadcast.compress", "false") \
                         .set("spark.network.timeout", "800s") \
                         .set("spark.executor.heartbeatInterval", "60s") \
-                        .set("spark.dynamicAllocation.enabled", "false") \
-                        .set("spark.speculation", "true")
+                        .set("spark.dynamicAllocation.enabled", "true") \
+                        .set("spark.dynamicAllocation.minExecutors", "2") \
+                        .set("spark.dynamicAllocation.maxExecutors", "10") \
+                        .set("spark.speculation", "true") \
+                        .set("spark.speculation.quantile", "0.75") \
+                        .set("spark.speculation.multiplier", "1.5")
                         # .set("spark.rpc.message.maxSize", "512") \
 
 sparkcontext = SparkContext(conf=sparkconf)
@@ -130,13 +133,23 @@ def process_chunks(chunk):
             print(f"Error processing chunk: {e}")
     return passwords
 
-def generate_combinations():
-    print("Making combinations")
-    max_password_length = 6
-    for length in range(1, max_password_length + 1):
-        for combination in itertools.product(CHARACTER_SPACE, repeat=length):
-            generated_combination = ''.join(combination)
-            yield str(generated_combination)
+# def generate_combinations():
+#     print("Making combinations")
+#     max_password_length = 6
+#     for length in range(1, max_password_length + 1):
+#         for combination in itertools.product(CHARACTER_SPACE, repeat=length):
+#             generated_combination = ''.join(combination)
+#             yield str(generated_combination)
+
+# def generate_combinations():
+#     print("Generating combinations...")
+#     combinations = itertools.product(CHARACTER_SPACE, repeat=6)  # Example: Adjust the repeat value as needed
+#     chunk_size = 1000  # Example: Adjust chunk size as needed
+#     while True:
+#         chunk = list(itertools.islice(combinations, chunk_size))
+#         if not chunk:
+#             break
+#         yield chunk
 
 # def generate_chunks(chunk_size, combinations_generator):
 #     chunk = []
