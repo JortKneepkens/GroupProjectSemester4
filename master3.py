@@ -25,7 +25,7 @@ sparkconf = SparkConf().setAppName("Password Cracker") \
                         .set("spark.dynamicAllocation.enabled", "false") \
                         .set("spark.rpc.message.maxSize", "512") \
                         .set("spark.task.cpus", "1") \
-                        .set("spark.speculation", "true") \
+                        .set("spark.speculation", "true")
 
 sparkcontext = SparkContext(conf=sparkconf)
 
@@ -243,7 +243,6 @@ async def main():
                                     print(f"Next chunk: {next_chunk}")
                                     if next_chunk:
                                         rdd = sparkcontext.parallelize(next_chunk)
-                                        rdd = rdd.repartition(sparkcontext.defaultParallelism)
                                         _ = rdd.unpersist()
                                         passwords = rdd.mapPartitions(execute_task).collect()
                                         # passwords = sparkcontext.parallelize(next_chunk).mapPartitions(execute_task).collect()
