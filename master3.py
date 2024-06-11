@@ -38,7 +38,7 @@ sparkconf = SparkConf().setAppName("Password Cracker") \
 
 sparkcontext = SparkContext(conf=sparkconf)
 
-websocket_uri = "ws://10.0.0.17:8181" 
+websocket_uri = "ws://10.0.0.19:8181" 
 
 ftp_server = "192.168.0.2"
 ftp_username = "sparkmaster"
@@ -270,7 +270,7 @@ async def main():
                                         tried_passwords_count += len(next_chunk) 
                                         elapsed_time = time.time() - start_time
                                         await websocket.send(json.dumps({
-                                            # "WsToken": token,
+                                            "WsToken": token,
                                             "Type": "Status_Update",
                                             "Tried_Passwords": tried_passwords_count,
                                             "Elapsed_Time": elapsed_time
@@ -281,7 +281,7 @@ async def main():
                                             elapsed_time = end_time - start_time  # Calculate the elapsed time
                                             print(f"Elapsed time: {elapsed_time} seconds")
                                             message = {
-                                                # "WsToken": token,
+                                                "WsToken": token,
                                                 "Type": "Password_Found",
                                                 "Content": passwords[0]
                                             }
