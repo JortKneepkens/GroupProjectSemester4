@@ -38,7 +38,7 @@ sparkconf = SparkConf().setAppName("Password Cracker") \
 
 sparkcontext = SparkContext(conf=sparkconf)
 
-websocket_uri = "ws://10.0.0.19:8181" 
+websocket_uri = "wss://10.0.0.19:8181" 
 
 ftp_server = "192.168.0.2"
 ftp_username = "sparkmaster"
