@@ -1,7 +1,7 @@
 import itertools
 import os
 import sys
-from pyspark import SparkContext, SparkConf, AccumulatorParam
+from pyspark import SparkContext, SparkConf
 import ftplib
 import websockets
 import asyncio
@@ -33,8 +33,6 @@ sparkconf = SparkConf().setAppName("Password Cracker") \
                         .set("spark.fileserver.port", "10024") \
                         .set("spark.replClassServer.port", "10025") \
                         .set("spark.port.maxRetries", "50")
-                        # .set("spark.driver.host", "145.220.74.141") \
-                        # .set("spark.rpc.message.maxSize", "512") \
 
 sparkcontext = SparkContext(conf=sparkconf)
 
@@ -49,9 +47,6 @@ CHARACTER_SPACE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345678
 user_script_module = None
 user_script_filename = None
 hashed_password = None
-
-# # Initialize shared accumulator for indicating password found status
-# password_found = sparkcontext.accumulator(False, PasswordFoundAccumulatorParam())
 
 async def retrieve_file(ftp_server, ftp_username, ftp_password, remote_filename, local_filename):
     try:
@@ -101,18 +96,6 @@ async def load_user_script():
     except Exception as e:
         print(f"Error loading user script: {e}")
 
-# def execute_task(chunk):
-#     print("Executing task at worker")
-#     print("Chunk:")
-#     print(chunk)
-#     try:
-#         for task in chunk:
-#             if user_script_module.crack_password("sha1", hashed_password, task):
-#                 print(f"password found: {task}")
-#                 return task
-#     except Exception as e:
-#         print(f"Error cracking password: {e}")
-#         return []
 def execute_task(chunk):
     print("Executing task at worker")
     print("Chunk:")
@@ -127,18 +110,6 @@ def execute_task(chunk):
     except Exception as e:
         print(f"Error cracking password: {e}")
     return results  # Always return a list
-    
-# Process chunks independently
-def process_chunks(chunk):
-    passwords = []
-    for combination in chunk:
-        try:
-            password = execute_task(combination)
-            if password is not None:
-                passwords.append(password)
-        except Exception as e:
-            print(f"Error processing chunk: {e}")
-    return passwords
 
 def generate_combinations():
     print("Making combinations")
@@ -147,37 +118,6 @@ def generate_combinations():
         for combination in itertools.product(CHARACTER_SPACE, repeat=length):
             generated_combination = ''.join(combination)
             yield str(generated_combination)
-
-# def generate_combinations():
-#     print("Generating combinations...")
-#     combinations = itertools.product(CHARACTER_SPACE, repeat=6)  # Example: Adjust the repeat value as needed
-#     chunk_size = 1000  # Example: Adjust chunk size as needed
-#     while True:
-#         chunk = list(itertools.islice(combinations, chunk_size))
-#         if not chunk:
-#             break
-#         yield chunk
-
-# def generate_chunks(chunk_size, combinations_generator):
-#     chunk = []
-#     for _ in range(chunk_size):
-#         try:
-#             combination = next(combinations_generator)
-#             chunk.append(combination)
-#         except StopIteration:
-#             break
-#     return chunk, combinations_generator
-
-# def generate_chunk(chunk_size):
-#     chunk = []
-#     combinations_generator = generate_combinations()
-#     for _ in range(chunk_size):
-#         try:
-#             combination = next(combinations_generator)
-#             chunk.append(combination)
-#         except StopIteration:
-#             break
-#     yield chunk
 
 # Dynamically allocate chunks to workers
 def allocate_chunks(chunk_size):
@@ -239,23 +179,7 @@ async def main():
                             hashed_password = message_content
                             if user_script_module is not None:
                                 start_time = time.time()  # Record the start time
-                                chunk_size = 750000
-                                # combinations_generator = generate_combinations()
-                                # while True:
-                                #     combinations_chunk, combinations_generator = generate_chunks(chunk_size, combinations_generator)
-                                #     if combinations_chunk:
-                                #         print(combinations_chunk)
-                                #         password = sparkcontext.parallelize([combinations_chunk]).map(lambda chunk: execute_task(chunk)).filter(lambda x: x is not None).collect()
-                                #         print(f"Password: {password}")
-                                #         if password:
-                                #             print("Password found:", password[0]) 
-                                #             end_time = time.time()  # Record the end time
-                                #             elapsed_time = end_time - start_time  # Calculate the elapsed time
-                                #             print(f"Elapsed time: {elapsed_time} seconds")
-                                #             break 
-                                #     else:
-                                #         print("No more combinations to try.")
-                                #         break
+                                chunk_size = 2000000
                                 generated_chunks = allocate_chunks(chunk_size)
                                 while True:
                                     next_chunk = next(generated_chunks)
@@ -265,7 +189,6 @@ async def main():
                                         _ = rdd.unpersist()
                                         passwords = rdd.mapPartitions(execute_task).collect()
                                         print(rdd.cache())
-                                        # passwords = sparkcontext.parallelize(next_chunk).mapPartitions(execute_task).collect()
                                         print("passwords: ")
                                         print(passwords)
                                         tried_passwords_count += len(next_chunk) 
