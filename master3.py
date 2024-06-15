@@ -194,6 +194,7 @@ async def main():
                                 num_slices = num_executors * slices_per_executor
                                 print(f"Number of slices: {num_slices}")
                                 print(f"Number of executors: {num_executors}")
+                                await asyncio.sleep(5)
                                 while True:
                                     next_chunk = next(generated_chunks)
                                     if next_chunk:
