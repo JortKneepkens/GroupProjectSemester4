@@ -32,7 +32,10 @@ sparkconf = SparkConf().setAppName("Password Cracker") \
                         .set("spark.broadcast.port", "10023") \
                         .set("spark.fileserver.port", "10024") \
                         .set("spark.replClassServer.port", "10025") \
-                        .set("spark.port.maxRetries", "50")
+                        .set("spark.port.maxRetries", "50") \
+                        .set("spark.memory.offHeap.enabled", "true") \
+                        .set("spark.memory.offHeap.size", "4g") \
+                        .set("spark.driver.memory", "4g")
 
 sparkcontext = SparkContext(conf=sparkconf)
 
@@ -152,6 +155,11 @@ serialized_cleanup = cloudpickle.dumps(cleanup)
 # Pass the serialized cleanup function to every worker
 sparkcontext.broadcast(serialized_cleanup)
 
+def get_num_executors() -> int :
+    executor_info = sparkcontext.getExecutorMemoryStatus()
+    # Subtract 1 to exclude the driver
+    return len(executor_info) - 1
+
 async def main():
     global hashed_password
     global user_script_module
@@ -181,13 +189,18 @@ async def main():
                                 start_time = time.time()  # Record the start time
                                 chunk_size = 10000000
                                 generated_chunks = allocate_chunks(chunk_size)
+                                num_executors = get_num_executors()
+                                slices_per_executor = 10
+                                num_slices = num_executors * slices_per_executor
+                                print(f"Number of slices: {num_slices}")
+                                print(f"Number of executors: {num_executors}")
                                 while True:
                                     next_chunk = next(generated_chunks)
                                     if next_chunk:
                                         print("Last tried password of the chunk: " + next_chunk[-1])
-                                        rdd = sparkcontext.parallelize(next_chunk)
-                                        _ = rdd.unpersist()
+                                        rdd = sparkcontext.parallelize(next_chunk, numSlices=num_slices)
                                         passwords = rdd.mapPartitions(execute_task).collect()
+                                        rdd.unpersist()
                                         print(rdd.cache())
                                         print("passwords: ")
                                         print(passwords)
