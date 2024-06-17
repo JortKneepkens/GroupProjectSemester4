@@ -156,7 +156,8 @@ serialized_cleanup = cloudpickle.dumps(cleanup)
 sparkcontext.broadcast(serialized_cleanup)
 
 def get_num_executors() -> int :
-    executor_info = sparkcontext.getExecutorMemoryStatus()
+    executor_info = sparkcontext.getConf().get("spark.executor.instances")
+    print("executor_info: "+ executor_info)
     # Subtract 1 to exclude the driver
     return len(executor_info) - 1
 
