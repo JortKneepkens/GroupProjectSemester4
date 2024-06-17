@@ -1,6 +1,7 @@
 import itertools
 import os
 import sys
+import urllib
 from pyspark import SparkContext, SparkConf
 import ftplib
 import websockets
@@ -155,21 +156,17 @@ serialized_cleanup = cloudpickle.dumps(cleanup)
 # Pass the serialized cleanup function to every worker
 sparkcontext.broadcast(serialized_cleanup)
 
-def get_num_executors() -> int:
-    # Returns a list of executor IDs, subtract 1 for the driver
-    print(sparkcontext._jsc.sc().getExecutorIds())
-    return len(sparkcontext._jsc.sc().getExecutorIds()) - 1
-
-# def get_num_executors(app_id, spark_master_url):
-#     try:
-#         response = requests.get(f"{spark_master_url}/applications/{app_id}/executors")
-#         response.raise_for_status()
-#         executors = response.json()
-#         # Subtract 1 to exclude the driver
-#         return len(executors) - 1
-#     except Exception as e:
-#         print(f"Error retrieving number of executors: {e}")
-#         return 0
+def get_num_executors():
+    try:
+        app_id = sparkcontext.applicationId
+        url = f"http://10.0.0.18:8080/applications/{app_id}/executors"
+        with urllib.request.urlopen(url) as response:
+            data = json.loads(response.read().decode())
+            # Subtract 1 to exclude the driver
+            return len(data) - 1
+    except Exception as e:
+        print(f"Error retrieving number of executors: {e}")
+        return 0
 
 async def main():
     global hashed_password
