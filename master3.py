@@ -155,12 +155,9 @@ serialized_cleanup = cloudpickle.dumps(cleanup)
 # Pass the serialized cleanup function to every worker
 sparkcontext.broadcast(serialized_cleanup)
 
-def get_num_executors() -> int :
-    executor_info = sparkcontext.getConf().get("spark.executor.instances")
-    print("executor_info: ")
-    print(executor_info)
-    # Subtract 1 to exclude the driver
-    return len(executor_info) - 1
+def get_num_executors() -> int:
+    # Returns a list of executor IDs, subtract 1 for the driver
+    return len(sparkcontext._jsc.sc().getExecutorIds()) - 1
 
 async def main():
     global hashed_password
