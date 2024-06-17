@@ -156,17 +156,17 @@ serialized_cleanup = cloudpickle.dumps(cleanup)
 # Pass the serialized cleanup function to every worker
 sparkcontext.broadcast(serialized_cleanup)
 
-def get_num_executors():
-    try:
-        app_id = sparkcontext.applicationId
-        url = f"http://10.0.0.18:8080/applications/{app_id}/executors"
-        with urllib.request.urlopen(url) as response:
-            data = json.loads(response.read().decode())
-            # Subtract 1 to exclude the driver
-            return len(data) - 1
-    except Exception as e:
-        print(f"Error retrieving number of executors: {e}")
-        return 0
+# def get_num_executors():
+#     try:
+#         app_id = sparkcontext.applicationId
+#         url = f"http://10.0.0.18:8080/applications/{app_id}/executors"
+#         with urllib.request.urlopen(url) as response:
+#             data = json.loads(response.read().decode())
+#             # Subtract 1 to exclude the driver
+#             return len(data) - 1
+#     except Exception as e:
+#         print(f"Error retrieving number of executors: {e}")
+#         return 0
 
 async def main():
     global hashed_password
@@ -197,17 +197,17 @@ async def main():
                                 start_time = time.time()  # Record the start time
                                 chunk_size = 20000000
                                 generated_chunks = allocate_chunks(chunk_size)
-                                num_executors = get_num_executors()
-                                slices_per_executor = 10
-                                num_slices = num_executors * slices_per_executor
-                                print(f"Number of slices: {num_slices}")
-                                print(f"Number of executors: {num_executors}")
+                                # num_executors = get_num_executors()
+                                # slices_per_executor = 10
+                                # num_slices = num_executors * slices_per_executor
+                                # print(f"Number of slices: {num_slices}")
+                                # print(f"Number of executors: {num_executors}")
                                 await asyncio.sleep(5)
                                 while True:
                                     next_chunk = next(generated_chunks)
                                     if next_chunk:
                                         print("Last tried password of the chunk: " + next_chunk[-1])
-                                        rdd = sparkcontext.parallelize(next_chunk, numSlices=num_slices)
+                                        rdd = sparkcontext.parallelize(next_chunk)
                                         passwords = rdd.mapPartitions(execute_task).collect()
                                         rdd.unpersist()
                                         print("passwords: ")
