@@ -189,7 +189,7 @@ async def main():
                                         print("Last tried password of the chunk: " + next_chunk[-1])
                                         rdd = sparkcontext.parallelize(next_chunk)
                                         _ = rdd.unpersist()
-                                        passwords = rdd.mapPartitions(execute_task).collect()
+                                        passwords = rdd.mapPartitions(execute_task, numSlices=12).collect()
                                         rdd.unpersist()
                                         print(rdd.cache())
                                         print("passwords: ")
