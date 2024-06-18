@@ -181,7 +181,7 @@ async def main():
                             hashed_password = message_content
                             if user_script_module is not None:
                                 start_time = time.time()  # Record the start time
-                                chunk_size = 10000000
+                                chunk_size = 5000000
                                 generated_chunks = allocate_chunks(chunk_size)
                                 while True:
                                     next_chunk = next(generated_chunks)
