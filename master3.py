@@ -1,7 +1,6 @@
 import itertools
 import os
 import sys
-import urllib
 from pyspark import SparkContext, SparkConf
 import ftplib
 import websockets
@@ -195,7 +194,7 @@ async def main():
                             hashed_password = message_content
                             if user_script_module is not None:
                                 start_time = time.time()  # Record the start time
-                                chunk_size = 20000000
+                                chunk_size = 10000000
                                 generated_chunks = allocate_chunks(chunk_size)
                                 # num_executors = get_num_executors()
                                 # slices_per_executor = 10
