@@ -32,7 +32,8 @@ sparkconf = SparkConf().setAppName("Password Cracker") \
                         .set("spark.broadcast.port", "10023") \
                         .set("spark.fileserver.port", "10024") \
                         .set("spark.replClassServer.port", "10025") \
-                        .set("spark.port.maxRetries", "50")
+                        .set("spark.port.maxRetries", "50") \
+                        .set("spark.default.parallelism", "12")
 
 sparkcontext = SparkContext(conf=sparkconf)
 
@@ -189,7 +190,7 @@ async def main():
                                         print("Last tried password of the chunk: " + next_chunk[-1])
                                         rdd = sparkcontext.parallelize(next_chunk)
                                         _ = rdd.unpersist()
-                                        passwords = rdd.mapPartitions(execute_task, numSlices=12).collect()
+                                        passwords = rdd.mapPartitions(execute_task).collect()
                                         rdd.unpersist()
                                         print(rdd.cache())
                                         print("passwords: ")
