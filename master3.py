@@ -126,6 +126,8 @@ def allocate_chunks(chunk_size):
     while True:
         chunk = []
         print("Nieuwe chunk")
+        print(chunk)
+        print("chunk")
         for _ in range(chunk_size):
             try:
                 combination = next(combinations_generator)
@@ -188,6 +190,7 @@ async def main():
                                         rdd = sparkcontext.parallelize(next_chunk)
                                         _ = rdd.unpersist()
                                         passwords = rdd.mapPartitions(execute_task).collect()
+                                        rdd.unpersist()
                                         print(rdd.cache())
                                         print("passwords: ")
                                         print(passwords)
