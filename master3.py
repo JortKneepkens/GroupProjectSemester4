@@ -101,8 +101,7 @@ async def load_user_script():
 
 def execute_task(chunk):
     print("Executing task at worker")
-    print("Chunk:")
-    print(chunk)
+    worker_start_time = time.time()
     results = []  # Initialize an empty list to store results
     try:
         for task in chunk:
@@ -112,6 +111,9 @@ def execute_task(chunk):
                 break  # If a password is found, break the loop
     except Exception as e:
         print(f"Error cracking password: {e}")
+    worker_end_time = time.time()  # End time for this worker
+    worker_duration = worker_end_time - worker_start_time
+    print(f"Worker duration: {worker_duration:.2f} seconds")
     return results  # Always return a list
 
 def generate_combinations():
@@ -198,18 +200,18 @@ async def main():
                                         print("passwords: ")
                                         print(passwords)
                                         tried_passwords_count += len(next_chunk) 
-                                        elapsed_time = time.time() - start_time
+                                        elapsed_time = (time.time() - start_time) / 60
                                         await websocket.send(json.dumps({
                                             "WsToken": token,
                                             "Type": "Status_Update",
                                             "Tried_Passwords": tried_passwords_count,
-                                            "Elapsed_Time": elapsed_time
+                                            "Elapsed_Time": f"{elapsed_time:.2f}"
                                         }))
                                         if any(passwords):
                                             print("Password found:", [password for password in passwords if password])
                                             end_time = time.time()  # Record the end time
                                             elapsed_time = end_time - start_time  # Calculate the elapsed time
-                                            print(f"Elapsed time: {elapsed_time} seconds")
+                                            print(f"Elapsed time: {elapsed_time:.2f} seconds")
                                             message = {
                                                 "WsToken": token,
                                                 "Type": "Password_Found",
