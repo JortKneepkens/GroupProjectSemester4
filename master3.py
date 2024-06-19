@@ -33,7 +33,7 @@ sparkconf = SparkConf().setAppName("Password Cracker") \
                         .set("spark.fileserver.port", "10024") \
                         .set("spark.replClassServer.port", "10025") \
                         .set("spark.port.maxRetries", "50") \
-                        .set("spark.default.parallelism", "20") \
+                        .set("spark.default.parallelism", "40") \
                         .set("spark.driver.memory", "10g") \
                         .set("spark.executor.memory", "2g")
 
