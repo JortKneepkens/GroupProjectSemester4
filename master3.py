@@ -205,7 +205,7 @@ async def main():
                                             "WsToken": token,
                                             "Type": "Status_Update",
                                             "Tried_Passwords": tried_passwords_count,
-                                            "Elapsed_Time": "elapsed_time"
+                                            "Elapsed_Time": elapsed_time
                                         }))
                                         if any(passwords):
                                             print("Password found:", [password for password in passwords if password])
