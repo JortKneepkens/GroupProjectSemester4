@@ -1,3 +1,4 @@
+import subprocess
 import itertools
 import os
 import sys
@@ -159,6 +160,18 @@ serialized_cleanup = cloudpickle.dumps(cleanup)
 # Pass the serialized cleanup function to every worker
 sparkcontext.broadcast(serialized_cleanup)
 
+def analyze_script(filename):
+    print("filename:")
+    print(filename)
+    result = subprocess.run(['bandit', '-r', filename], capture_output=True, text=True)
+    print("Result")
+    print(result)
+    if "No issues identified" in result.stdout:
+        return True
+    else:
+        print(f"Security issues found in script:\n{result.stdout}")
+        return False
+
 async def main():
     global hashed_password
     global user_script_module
@@ -179,8 +192,12 @@ async def main():
                             print(f"Received message: {message_content}")
                             user_script_filename = message_content
                             if await retrieve_file(ftp_server, ftp_username, ftp_password, message_content, user_script_filename):
-                                sparkcontext.addFile(user_script_filename)
-                                await load_user_script()  # Load user script once
+                                if analyze_script(user_script_filename):
+                                    sparkcontext.addFile(user_script_filename)
+                                    await load_user_script()  # Load user script once
+                                else:
+                                    print("User script contains security issues. Aborting.")
+                                    continue
                         elif message_type == "Message":
                             print("Received hashed password:", message_content)
                             hashed_password = message_content
