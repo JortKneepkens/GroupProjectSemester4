@@ -19,8 +19,6 @@ sparkconf = SparkConf().setAppName("Password Cracker") \
                         .set("spark.shuffle.compress", "false") \
                         .set("spark.shuffle.spill.compress", "false") \
                         .set("spark.broadcast.compress", "false") \
-                        .set("spark.network.timeout", "800s") \
-                        .set("spark.executor.heartbeatInterval", "60s") \
                         .set("spark.dynamicAllocation.enabled", "false") \
                         .set("spark.speculation", "true") \
                         .set("spark.speculation.quantile", "0.75") \
@@ -36,6 +34,8 @@ sparkconf = SparkConf().setAppName("Password Cracker") \
                         .set("spark.default.parallelism", "40") \
                         .set("spark.driver.memory", "10g") \
                         .set("spark.executor.memory", "2g")
+                        # .set("spark.network.timeout", "800s") \
+                        # .set("spark.executor.heartbeatInterval", "60s") \ 
 
 sparkcontext = SparkContext(conf=sparkconf)
 
@@ -200,12 +200,12 @@ async def main():
                                         print("passwords: ")
                                         print(passwords)
                                         tried_passwords_count += len(next_chunk) 
-                                        elapsed_time = (time.time() - start_time) / 60
+                                        elapsed_time = time.time() - start_time
                                         await websocket.send(json.dumps({
                                             "WsToken": token,
                                             "Type": "Status_Update",
                                             "Tried_Passwords": tried_passwords_count,
-                                            "Elapsed_Time": f"{elapsed_time:.2f}"
+                                            "Elapsed_Time": "elapsed_time"
                                         }))
                                         if any(passwords):
                                             print("Password found:", [password for password in passwords if password])
